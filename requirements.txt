@@ -1,0 +1,16 @@
+# Week 1 dependencies (existing)
+crawl4ai
+langchain-text-splitters
+sentence-transformers
+torch
+pgvector
+psycopg2-binary
+rank_bm25
+python-dotenv
+google-genai
+
+# Week 2 dependencies (new)
+openai>=1.0.0
+pydantic>=2.0
+pytest
+pytest-mock
