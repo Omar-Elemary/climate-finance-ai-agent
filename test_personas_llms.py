@@ -25,10 +25,10 @@ from src.personas import load_persona, list_personas
 from src.tools import RetrievalTool
 
 # Test configuration
-PERSONAS = ["investor", "policy_expert"]
+PERSONAS = ["cfo_agent_01", "env_specialist_01"]
 LLM_MODELS = [
-    "openai/gpt-oss-120b",
-    "openai/gpt-oss-20b"  # Using gpt-oss-20b as replacement for deprecated llama-3.3-70b-versatile
+    "liquid/lfm-2.5-2.6b:free",
+    "inclusionai/ling-3.0-flash-fin:free"
 ]
 TEST_TOPICS = [
     "Should developed countries significantly increase climate adaptation finance for developing nations?",

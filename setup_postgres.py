@@ -5,8 +5,8 @@ def setup_db():
     print("Connecting to PostgreSQL...")
     conn = psycopg2.connect(
         host="localhost",
-        port=5432,
-        database="climate_db",
+        port=5434,
+        database="climate_rag",
         user="postgres",
         password="postgres"
     )

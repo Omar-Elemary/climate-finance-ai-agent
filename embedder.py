@@ -10,7 +10,7 @@ from rank_bm25 import BM25Okapi
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 conn = psycopg2.connect(
-    host="localhost", port=5432, database="climate_db", 
+    host="localhost", port=5434, database="climate_rag", 
     user="postgres", password="postgres"
 )
 cursor = conn.cursor()

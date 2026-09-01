@@ -60,6 +60,31 @@ def build_evidence_block(
     return f"RETRIEVED EVIDENCE:\n{context_text}"
 
 
+def build_calculation_block(calculation_result: dict[str, Any] | None) -> str:
+    if not calculation_result:
+        return ""
+    metric = calculation_result.get("metric", "Unknown metric")
+    value = calculation_result.get("value", "N/A")
+    unit = calculation_result.get("unit", "")
+    lines = [f"CALCULATED RESULT:", f"- {metric}: {value}{' ' + unit if unit else ''}"]
+    for key, val in calculation_result.items():
+        if key not in ("metric", "value", "unit"):
+            lines.append(f"- {key}: {val}")
+    return "\n".join(lines)
+
+
+def build_web_results_block(web_results: list[dict[str, Any]] | None) -> str:
+    if not web_results:
+        return ""
+    lines = ["WEB SEARCH RESULTS (recent/current information):"]
+    for i, r in enumerate(web_results, 1):
+        title = r.get("title", "Untitled")
+        snippet = r.get("snippet", "")
+        url = r.get("url", "")
+        lines.append(f"[Web {i}] {title} (Source: {url}):\n{snippet}\n")
+    return "\n".join(lines)
+
+
 def build_chat_messages(
     persona_context: str = "",
     memory_context: str = "",
@@ -88,6 +113,8 @@ def build_opinion_messages(
     memory_context: str = "",
     evidence: list[dict[str, Any]] | None = None,
     topic: str = "",
+    calculation_result: dict[str, Any] | None = None,
+    web_results: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, str]]:
     system = build_system_message(
         persona_context=persona_context,
@@ -100,6 +127,14 @@ def build_opinion_messages(
         evidence_block = build_evidence_block(evidence)
         messages.append({"role": "system", "content": evidence_block})
 
+    if calculation_result:
+        calculation_block = build_calculation_block(calculation_result)
+        messages.append({"role": "system", "content": calculation_block})
+
+    if web_results:
+        web_block = build_web_results_block(web_results)
+        messages.append({"role": "system", "content": web_block})
+
     messages.append({
         "role": "user",
         "content": (
@@ -107,7 +142,9 @@ def build_opinion_messages(
             f"TOPIC: {topic}\n\n"
             f"Structure your response as:\n"
             f"1. YOUR OPINION: State your position clearly.\n"
-            f"2. EVIDENCE: Reference specific evidence from the provided context.\n"
+            f"2. EVIDENCE: Reference specific evidence from the provided context "
+            f"(retrieved evidence, calculated result, or web search results — "
+            f"whichever was provided).\n"
             f"3. REASONING: Explain your analysis connecting evidence to your position.\n"
             f"4. CAVEATS: Note any limitations or uncertainties."
         ),
