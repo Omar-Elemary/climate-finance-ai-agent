@@ -19,8 +19,7 @@ from src.llm import get_provider
 
 # Test models
 LLM_MODELS = [
-    "openai/gpt-oss-120b",
-    "openai/gpt-oss-20b"  # Using gpt-oss-20b as replacement for deprecated llama-3.3-70b-versatile
+    "inclusionai/ling-3.0-flash-fin:free"
 ]
 
 def test_model(model_name):

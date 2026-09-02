@@ -25,7 +25,7 @@ try:
     conn = psycopg2.connect(
         host="localhost", 
         port=5432, 
-        database="climate_db", 
+        database="climate_rag", 
         user="postgres", 
         password="postgres"
     )
