@@ -4,9 +4,9 @@ from pgvector.psycopg2 import register_vector
 def setup_db():
     print("Connecting to PostgreSQL...")
     conn = psycopg2.connect(
-        host="localhost",
+        host="127.0.0.1",
         port=5432,
-        database="climate_db",
+        database="climate_rag",
         user="postgres",
         password="postgres"
     )
