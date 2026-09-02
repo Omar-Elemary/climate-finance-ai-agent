@@ -16,7 +16,7 @@ test_topic = "Should developed countries significantly increase climate adaptati
 
 results = []
 
-print("🚀 Generating evaluation results locally...")
+print(" Generating evaluation results locally...")
 
 for model in models_to_test:
     for persona_key in personas_to_test:

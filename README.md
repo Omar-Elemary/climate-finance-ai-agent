@@ -360,3 +360,8 @@ These files remain exactly as they were:
 - **Lazy imports** — heavy dependencies (torch, sentence_transformers) only loaded when retrieval tool is used
 - **Clean interfaces** — Memory, Tool, LLMProvider are all abstract/protocol-based
 - **Single responsibility** — each module does one thing
+
+###  Memory Mechanism (Hybrid Strategy)
+* **Selected Approach:** Hybrid Memory (Combining Conversation History Buffer + Structured Key-Value Fact Storage).
+* **Why:** Ensures chronological dialogue flow via the history buffer while preventing critical parameter degradation (like budget, region, or scope) by explicitly persisting them in a structured key-value store.
+* **Limitations:** Relies on manual or heuristic entity extraction in this baseline phase; state is stored in volatile RAM during runtime and would require a persistent database backend (like PostgreSQL/pgvector or Redis) for multi-session persistence across server restarts.
