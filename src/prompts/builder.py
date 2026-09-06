@@ -73,15 +73,27 @@ def build_calculation_block(calculation_result: dict[str, Any] | None) -> str:
     return "\n".join(lines)
 
 
-def build_web_results_block(web_results: list[dict[str, Any]] | None) -> str:
+def build_web_results_block(
+    web_results: list[dict[str, Any]] | None,
+    max_chars_per_result: int = 3000,
+) -> str:
     if not web_results:
         return ""
     lines = ["WEB SEARCH RESULTS (recent/current information):"]
     for i, r in enumerate(web_results, 1):
         title = r.get("title", "Untitled")
-        snippet = r.get("snippet", "")
+        # Prefer the fully-extracted page content; fall back to the short
+        # search snippet if full-page extraction wasn't available for this URL.
+        body = r.get("content") or r.get("snippet", "")
+
+        # Hard safety cap: no matter what the tool returned (a bug, an
+        # unusually large PDF, etc.), never forward more than
+        # max_chars_per_result characters per result into the prompt.
+        if len(body) > max_chars_per_result:
+            body = body[:max_chars_per_result].rstrip() + " [...truncated]"
+
         url = r.get("url", "")
-        lines.append(f"[Web {i}] {title} (Source: {url}):\n{snippet}\n")
+        lines.append(f"[Web {i}] {title} (Source: {url}):\n{body}\n")
     return "\n".join(lines)
 
 
