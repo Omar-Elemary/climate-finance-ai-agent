@@ -330,3 +330,31 @@ python week2_demo.py --topic "Should fossil fuel subsidies be eliminated?"
 cd "E:\Tech\Hackathons\Fellowship\Week 2"
 python -m pytest tests/ -v
 ```
+---
+
+## Week 3: Agent Graph & Message Routing
+
+### 1. Graph Topology & Creation
+The multi-agent network is modeled as a directed graph where each persona represents a node, and valid directed communication paths represent edges. We implemented multiple creation patterns in `src/graph/topology.py`:
+* **Canonical Directed Ring (`create_ring_topology`):** A circular directed chain guaranteeing minimal $O(N)$ edges while ensuring cyclic dialogue progression ($A \to B \to C \to A$).
+* **Fully Connected (`create_fully_connected`):** A complete directed mesh where every agent can directly consult every other agent.
+* **Persona-Driven Topology (`create_persona_based_topology`):** Reflects the real-world Climate Finance workflow:
+  $$\text{Finance (CFO / Investor)} \longrightarrow \text{Regulators \& Compliance} \longrightarrow \text{Civil Society \& ESG} \longrightarrow \text{Industry Implementers} \longrightarrow \text{Finance}$$
+  With cross-cutting consultation shortcuts (e.g., ESG specialists directly advising investors, regulators auditing industry actors).
+
+### 2. Design Justification
+* **Deliberation Realism:** In climate finance, unconstrained message broadcasting creates noise. A structured, domain-aware flow ensures technical scrutiny occurs in the logical sequence of project vetting.
+* **Fair Participation:** Directed cyclic paths prevent vocal stakeholders from starving others of speaking turns.
+* **Modularity:** Adheres strictly to `AgentGraphProtocol`, allowing topologies to be swapped or extended without breaking orchestrator contracts.
+
+### 3. Strong Connectivity Guarantees
+* **Baseline Cycle:** All topology generators enforce a base directed Hamiltonian cycle across participating agents.
+* **Formal Verification (`validation.py`):** Verified via a two-pass Breadth-First Search (BFS):
+  1. Forward BFS verifies reachability from a root node to all other nodes.
+  2. Transpose BFS on the edge-reversed graph verifies reachability from all nodes back to the root.
+* If any node remains unvisited in either pass, `is_strongly_connected()` evaluates to `False`, and `GraphRouter` raises an explicit `ValueError`.
+
+### 4. Discussion Behavior & Routing
+* **Strict Message Routing:** Agents can only dispatch messages to adjacent neighbors via `GraphRouter.get_next_recipients(current_agent_id)`.
+* **Guaranteed Information Propagation:** Since the graph is strongly connected, any proposal or critique originating from any persona is mathematically guaranteed to traverse the entire network and reach all participants.
+* **Inspectability & Reproducibility:** The graph exports its structure deterministically via `to_dict()`, allowing exact JSON serialization of nodes and edges.
