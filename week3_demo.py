@@ -115,12 +115,21 @@ def run_mock_demo(topic: str, num_rounds: int) -> DiscussionResult:
     """Run demo with mock agents (no LLM required)."""
     print_header("WEEK 3 DEMO — MOCK AGENTS (No LLM Required)")
 
-    # Create mock agents
-    agents = [
-        DemoAgent("Climate Investor", "financial analyst focused on ROI"),
-        DemoAgent("Environmental Scientist", "researcher focused on ecological impact"),
-        DemoAgent("Policy Expert", "government advisor focused on regulatory frameworks"),
+    # Create mock agents — all personas
+    persona_configs = [
+        ("Climate Investor", "financial analyst focused on ROI and investment returns"),
+        ("Environmental Scientist", "researcher focused on ecological impact and climate data"),
+        ("Policy Expert", "government advisor focused on regulatory frameworks"),
+        ("CFO Agent", "chief financial officer focused on budget allocation and fiscal responsibility"),
+        ("Environmental Specialist", "specialist focused on environmental compliance and sustainability"),
+        ("Fossil Fuel Industry Agent", "industry representative focused on energy transition and legacy assets"),
+        ("Government Agent", "public sector official focused on national policy and international obligations"),
+        ("Industry Representative", "private sector leader focused on market mechanisms and private investment"),
+        ("Labour Representative", "worker advocate focused on just transition and employment impacts"),
+        ("Policy Compliance Officer", "regulatory specialist focused on compliance frameworks and standards"),
+        ("Sustainable Supply Chain", "supply chain expert focused on ESG criteria and sustainable procurement"),
     ]
+    agents = [DemoAgent(name, stance) for name, stance in persona_configs]
 
     # Configure discussion
     config = DiscussionConfig(
@@ -208,8 +217,8 @@ def run_live_demo(topic: str, num_rounds: int) -> DiscussionResult:
         print("No personas found in personas/ directory.")
         sys.exit(1)
 
-    # Use first 3 personas
-    selected = persona_names[:3]
+    # Use all personas
+    selected = persona_names
     tools = [RetrievalTool()]
     agents = []
     for name in selected:
