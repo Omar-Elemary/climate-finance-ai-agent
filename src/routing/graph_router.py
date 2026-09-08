@@ -1,10 +1,16 @@
 from typing import List, Dict, Any
 from src.graph.topology import AgentGraph
+from src.orchestration.router import Router
 from src.routing.base import RouterProtocol
 
 
-class GraphRouter(RouterProtocol):
-    """Router that determines message flow based on an AgentGraph."""
+class GraphRouter(Router, RouterProtocol):
+    """
+    Router that determines message flow based on an AgentGraph.
+
+    Implements both the orchestrator's Router protocol (for message routing)
+    and the legacy RouterProtocol (for backward compatibility).
+    """
 
     def __init__(self, graph: AgentGraph):
         if not graph.is_strongly_connected():
@@ -19,7 +25,6 @@ class GraphRouter(RouterProtocol):
         sender_id = message.get("agent_id", "")
         recipients = self.get_next_recipients(sender_id)
 
-        # Distribute the message to connected neighbors
         routed_messages = []
         for r_id in recipients:
             msg_copy = message.copy()
@@ -28,4 +33,3 @@ class GraphRouter(RouterProtocol):
             routed_messages.append(msg_copy)
 
         return routed_messages or [message]
-    
