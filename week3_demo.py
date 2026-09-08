@@ -30,6 +30,8 @@ from src.orchestration import (
     DiscussionStatus,
     InMemoryPersistence,
 )
+from src.graph.topology import AgentGraph
+from src.routing.graph_router import GraphRouter
 
 
 # ---------------------------------------------------------------------------
@@ -141,12 +143,25 @@ def run_mock_demo(topic: str, num_rounds: int) -> DiscussionResult:
     # Create persistence to inspect state
     persistence = InMemoryPersistence()
 
-    # Create and run orchestrator
-    orchestrator = DiscussionOrchestrator(persistence=persistence)
+    # Create a strongly connected graph for the agents
+    # Using ring topology ensures strong connectivity
+    agent_ids = [agent.name.lower().replace(" ", "_") for agent in agents]
+    graph = AgentGraph.create_ring_topology(agent_ids)
+    router = GraphRouter(graph)
+
+    # Create and run orchestrator with graph-based routing
+    orchestrator = DiscussionOrchestrator(
+        router=router,
+        persistence=persistence
+    )
 
     print(f"\nTopic: {topic}")
     print(f"Participants: {[a.name for a in agents]}")
     print(f"Rounds: {num_rounds}")
+    print(f"Graph Topology: Ring topology (strongly connected)")
+    # Show a few edges to demonstrate the structure
+    if len(agent_ids) >= 2:
+        print(f"  Example connections: {agent_ids[0]} → {agent_ids[1 % len(agent_ids)]}, {agent_ids[-1]} → {agent_ids[0]}")
 
     result = orchestrator.start_discussion(
         topic=topic,
@@ -162,6 +177,7 @@ def run_mock_demo(topic: str, num_rounds: int) -> DiscussionResult:
             current_round = msg.round
             print_round_header(current_round, result.rounds_completed)
         print_agent_message(msg.agent_name, msg.content)
+        print(f"    Metadata: {msg.metadata}")
 
     # Display opinion evolution
     print_opinion_evolution(result.opinions)
@@ -232,7 +248,21 @@ def run_live_demo(topic: str, num_rounds: int) -> DiscussionResult:
         enable_opinion_tracking=True,
     )
 
-    # Create orchestrator with real retriever
+    # Create a strongly connected graph for the agents
+    # Using ring topology ensures strong connectivity
+    agent_ids = [agent.persona.name.lower().replace(" ", "_") for agent in agents]
+    graph = AgentGraph.create_ring_topology(agent_ids)
+    router = GraphRouter(graph)
+
+    print(f"\nTopic: {topic}")
+    print(f"Participants: {selected}")
+    print(f"Rounds: {num_rounds}")
+    print(f"Graph Topology: Ring topology (strongly connected)")
+    # Show a few edges to demonstrate the structure
+    if len(agent_ids) >= 2:
+        print(f"  Example connections: {agent_ids[0]} → {agent_ids[1 % len(agent_ids)]}, {agent_ids[-1]} → {agent_ids[0]}")
+
+    # Create orchestrator with real retriever and graph-based routing
     from src.tools.retrieval import RetrievalTool as RT
 
     class RetrieverAdapter:
@@ -246,6 +276,7 @@ def run_live_demo(topic: str, num_rounds: int) -> DiscussionResult:
 
     persistence = InMemoryPersistence()
     orchestrator = DiscussionOrchestrator(
+        router=router,
         retriever=RetrieverAdapter(),
         persistence=persistence,
     )
@@ -278,6 +309,7 @@ def run_live_demo(topic: str, num_rounds: int) -> DiscussionResult:
         round_msgs = [m for m in result.messages if m.round == round_num]
         for msg in round_msgs:
             print_agent_message(msg.agent_name, msg.content[:300])
+            print(f"    Metadata: {msg.metadata}")
 
     print_opinion_evolution(result.opinions)
     print_retrieval_events(result.retrieval_events)
