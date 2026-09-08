@@ -212,7 +212,10 @@ class DiscussionOrchestrator:
         response_text = self._safe_agent_respond(agent, context)
 
         # 4. Route the response
+        # Generate message ID early so router can access it for tracking
+        message_id = str(uuid.uuid4())
         agent_message_dict = {
+            "message_id": message_id,
             "agent_id": agent_id,
             "agent_name": agent_name,
             "content": response_text,
@@ -225,7 +228,7 @@ class DiscussionOrchestrator:
         # 5. Record messages
         for routed in routed_messages:
             msg = Message(
-                message_id=str(uuid.uuid4()),
+                message_id=routed.get("message_id", str(uuid.uuid4())),
                 discussion_id=state.discussion_id,
                 round=state.current_round,
                 agent_id=routed.get("agent_id", agent_id),
