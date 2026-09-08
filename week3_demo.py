@@ -51,6 +51,10 @@ def run_week3_demo():
     router = GraphRouter(graph)
     persistence = InMemoryPersistence()
 
+<<<<<<< HEAD
+=======
+    # 4. Orchestration Configuration
+>>>>>>> 5e58aea056ce91918fb3deadf1b9475b5453483e
     config = DiscussionConfig(
         num_rounds=3,
         enable_retrieval=False,
@@ -76,6 +80,10 @@ def run_week3_demo():
     print(f"    - Rounds Completed: {result.rounds_completed}")
     print(f"    - Messages Exchanged: {len(result.messages)}")
 
+<<<<<<< HEAD
+=======
+    # 7. Display Opinions Across Rounds
+>>>>>>> 5e58aea056ce91918fb3deadf1b9475b5453483e
     print("\n[5] Recorded Opinions Trajectory:")
     for agent_id, history in result.opinions.items():
         for record in history:
