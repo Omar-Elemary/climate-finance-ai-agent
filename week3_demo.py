@@ -33,6 +33,7 @@ def run_week3_demo():
     print("🌍 Week 3 Multi-Agent Discussion System: Climate Finance Simulation")
     print("=" * 75)
 
+    # 1. Initialize Persona Agents
     agents = [
         DemoAgent("investor", "Institutional Investor", "Capital Allocation"),
         DemoAgent("policy_maker", "Regulatory Authority", "Climate Compliance"),
@@ -42,19 +43,18 @@ def run_week3_demo():
     agent_ids = [a.id for a in agents]
     print(f"\n[1] Initializing Agent Ecosystem: {agent_ids}")
 
+    # 2. Setup Strongly Connected Topology
     graph = AgentGraph.create_persona_based_topology(agent_ids)
     is_connected = graph.is_strongly_connected()
     print(f"    Graph strong connectivity verified: {is_connected}")
     assert is_connected, "Graph must be strongly connected!"
 
+    # 3. Setup Router & Persistence
     print("\n[2] Setting up GraphRouter & In-Memory Persistence Layer...")
     router = GraphRouter(graph)
     persistence = InMemoryPersistence()
 
-<<<<<<< HEAD
-=======
     # 4. Orchestration Configuration
->>>>>>> 5e58aea056ce91918fb3deadf1b9475b5453483e
     config = DiscussionConfig(
         num_rounds=3,
         enable_retrieval=False,
@@ -65,6 +65,7 @@ def run_week3_demo():
         persistence=persistence,
     )
 
+    # 5. Execute Multi-Round Discussion
     topic = "Financing Industrial Decarbonization and Green Hydrogen"
     print(f"\n[3] Launching Discussion on: '{topic}' across 3 rounds...")
 
@@ -74,21 +75,20 @@ def run_week3_demo():
         config=config,
     )
 
+    # 6. Verify Execution Metrics
     print(f"\n[4] Discussion Lifecycle Completed:")
     print(f"    - Discussion ID: {result.discussion_id}")
     print(f"    - Status: {result.status.value}")
     print(f"    - Rounds Completed: {result.rounds_completed}")
     print(f"    - Messages Exchanged: {len(result.messages)}")
 
-<<<<<<< HEAD
-=======
     # 7. Display Opinions Across Rounds
->>>>>>> 5e58aea056ce91918fb3deadf1b9475b5453483e
     print("\n[5] Recorded Opinions Trajectory:")
     for agent_id, history in result.opinions.items():
         for record in history:
             print(f"    - Round {record.round} | {record.agent_name}: \"{record.opinion[:60]}...\"")
 
+    # 8. Persistence Verification
     print("\n[6] Validating State Persistence Checkpoints:")
     loaded_state = persistence.load(result.discussion_id)
     if loaded_state and loaded_state.status == DiscussionStatus.COMPLETED:
