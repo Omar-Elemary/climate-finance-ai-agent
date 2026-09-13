@@ -1,8 +1,15 @@
 # Week 1 dependencies (existing)
 crawl4ai
 langchain-text-splitters
+# NOTE (Hanaa's PreTrainedModel issue): sentence-transformers + transformers +
+# torch/torchvision must be mutually compatible. If you see
+# "Could not import module 'PreTrainedModel'", upgrade them together:
+#   pip install -U sentence-transformers transformers torch torchvision
+# (CPU-only torch: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu)
+# Retrieval still works in BM25-only mode without torch (see retriever.py).
 sentence-transformers
 torch
+torchvision
 pgvector
 psycopg2-binary
 rank_bm25

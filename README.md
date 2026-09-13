@@ -1,332 +1,296 @@
-# Climate Finance RAG Agent — Week 2
+# Climate Finance AI Agent
 
-> **Week 2 Focus:** Core Agent Architecture + LLM Abstraction + Generation Pipeline
+> Grounded, multi-persona AI system for climate-finance questions — built week by week: RAG retrieval → configurable Agent → multi-agent discussion → discussion analytics.
 
-## What Week 2 Adds
-
-Week 2 extends the Week 1 RAG pipeline with a **reusable, persona-agnostic Agent framework**. The Agent is the central abstraction that orchestrates persona, memory, tools, and LLM generation — without being hardcoded to any specific provider or persona.
-
-### Key Capabilities
-
-1. **Configurable agents** — any persona, any LLM provider, any tool set
-2. **Persistent memory** — interface for Member 3 to implement
-3. **Tool access** — registry-based tool system with built-in retrieval adapter
-4. **Week 1 retrieval integration** — thin adapter around `hybrid_search_with_metadata()`
-5. **Grounded opinion generation** — structured output with evidence + sources
-6. **Multi-provider LLM** — OpenRouter, OpenAI, Gemini, Ollama, Anthropic, or any OpenAI-compatible endpoint
-7. **Reusable architecture** — supports multiple personas, ready for Week 3 multi-agent
+| Week | Focus | Entry point |
+|------|-------|-------------|
+| [Week 1](#week-1--rag-pipeline) | Scrape → chunk → embed → hybrid retrieval → grounded generation | `rag_agent.py` |
+| [Week 2](#week-2--core-agent) | Persona-agnostic `Agent` (persona + memory + tools + multi-provider LLM) | `week2_demo.py` |
+| [Week 3](#week-3--multi-agent-discussion) | Agent graph + router + orchestrator + persistence, ≥3 rounds | `week3_demo.py` |
+| [Week 4](#week-4--analytics--hardening) | Opinion/agreement analytics (`src/metrics/`) + retrieval hardening | `tests/test_opinion.py`, `tests/test_agreement.py` |
 
 ---
 
-## Architecture
+## Table of Contents
 
-```
-                    Persona (JSON config)
-                       │
-                       ▼
-                 ┌───────────┐
-                 │   Agent   │
-                 └─────┬─────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-       Memory        Tools        LLM
-       (interface)  (registry)  (provider)
-          │            │            │
-          │            ▼            │
-          │       Week 1 RAG       │
-          │       (RetrievalTool)  │
-          │            │            │
-          │            ▼            │
-          │         Evidence        │
-          └────────────┼────────────┘
-                       ▼
-                Context Builder
-                       │
-                       ▼
-                 LLM Generation
-                       │
-                       ▼
-                    Response
-```
+- [Week 1 — RAG Pipeline](#week-1--rag-pipeline)
+- [Week 2 — Core Agent](#week-2--core-agent)
+- [Week 3 — Multi-Agent Discussion](#week-3--multi-agent-discussion)
+- [Week 4 — Analytics + Hardening](#week-4--analytics--hardening)
+- [Setup](#setup)
+- [Running](#running)
+- [Project Structure](#project-structure)
+- [LLM Providers](#llm-providers)
+- [Tests](#tests)
+- [Data](#data)
+- [Limitations & Next Steps](#limitations--next-steps)
 
 ---
 
-## Files Added
+## Week 1 — RAG Pipeline
 
-```
-src/
-├── __init__.py
-├── agent.py                  # Core Agent class
-├── llm/
-│   ├── __init__.py           # Auto-discovery + provider registry
-│   ├── base.py               # LLMProvider abstract class + LLMResponse
-│   ├── openrouter.py         # OpenRouter provider (via openai SDK)
-│   ├── gemini.py             # Gemini provider (via google-genai SDK)
-│   └── openai_compat.py      # Generic OpenAI-compatible + OpenAI + Ollama + Anthropic
-├── memory/
-│   └── base.py               # Memory protocol interface
-├── tools/
-│   ├── __init__.py           # Lazy-loading tools package
-│   ├── base.py               # Tool abstract class + ToolResult
-│   └── retrieval.py          # RetrievalTool adapter for Week 1
-├── prompts/
-│   └── builder.py            # Context/message assembler
-└── personas/
-    ├── __init__.py
-    ├── base.py               # Persona dataclass
-    └── loader.py             # Load personas from JSON files
+**Goal:** build a grounded knowledge base from climate-finance sources and retrieve evidence with hybrid search.
 
-personas/
-├── investor.json             # Climate Investor persona
-├── policy_expert.json        # Policy Expert persona
-└── scientist.json            # Environmental Scientist persona
+### Stages
 
-week2_demo.py                 # Multi-persona demo entry point
-tests/
-├── test_agent.py             # 8 tests
-├── test_llm.py               # 7 tests
-├── test_tool.py              # 6 tests
-├── test_personas.py          # 6 tests
-└── test_prompts.py           # 8 tests
-docs/
-└── architecture.md           # Detailed architecture documentation
-requirements.txt              # Updated dependencies
-.env.example                  # Updated with LLM config vars
-```
-
-**No existing files modified.** Week 1 remains untouched.
-
----
-
-## LLM Providers
-
-### Supported Providers
-
-| Provider | `LLM_PROVIDER` value | Default Model | SDK |
-|----------|---------------------|---------------|-----|
-| OpenRouter | `openrouter` | `anthropic/claude-3.5-sonnet` | openai |
-| OpenAI | `openai` | `gpt-4o-mini` | openai |
-| Gemini | `gemini` | `gemini-3.5-flash` | google-genai |
-| Ollama | `ollama` | `llama3.1` | openai (local) |
-| Anthropic | `anthropic` | `claude-3-5-sonnet-20241022` | openai (compat) |
-| Any OpenAI-compatible | `openai_compat` | `gpt-4o-mini` | openai |
-
-### Auto-Discovery
-
-Providers are auto-discovered from `src/llm/*.py`. To add a new provider:
-
-1. Create `src/llm/my_provider.py`
-2. Subclass `LLMProvider`
-3. Set `provider_name = "my_provider"`
-4. Implement `generate()` and `_default_model()`
-
-The provider is immediately available via `LLM_PROVIDER=my_provider`.
-
-### Environment Variables
+| Stage | File | How |
+|-------|------|-----|
+| Scrape | `scraper.py` | `crawl4ai`, ~122 IPCC/UNFCCC/IRENA/IEA/WRI/ILO URLs, 3s sleep, skip-if-exists → `data/raw/doc_<md5>.md` |
+| Chunk | `chunker.py` | `RecursiveCharacterTextSplitter` 1000/200, skips source-only chunks → `data/chunks/master_chunks.json` |
+| Embed | `embedder.py` | `all-MiniLM-L6-v2` (384-d) → Postgres `pgvector` + `BM25Okapi` → `bm25_index.pkl` (generated, gitignored) |
+| Store | `setup_postgres.py` | Creates `vector` extension + `climate_docs(id, doc_id, source_url, chunk_text, embedding)` in DB `climate_rag` |
+| Retrieve | `retriever.py` | `hybrid_search_with_metadata(query, top_k=30, rrf_k=60, final_k=3)`: BM25 + vector → RRF merge → `ms-marco-MiniLM-L-6-v2` cross-encoder re-rank. Lazy-loaded with graceful degradation (torch/Postgres optional — falls back to BM25 built from `master_chunks.json`; see Week 4) |
+| Generate | `rag_agent.py` | Interactive CLI: retrieval + Gemini synthesis (temp 0.2) with citations |
+| Evaluate | `evaluate_rag.py` | 5 ground-truth queries, Precision@3 ≈ 1.00, Recall ≈ 0.78 → `docs/evaluation.md` |
 
 ```bash
-# .env
-LLM_PROVIDER=openrouter
-LLM_API_KEY=sk-or-...
-LLM_MODEL=anthropic/claude-3.5-sonnet
-LLM_BASE_URL=              # optional override
-LLM_TEMPERATURE=0.2
-LLM_MAX_TOKENS=2048
+python setup_postgres.py
+python scraper.py      # → data/raw/
+python chunker.py      # → data/chunks/master_chunks.json
+python embedder.py     # → pgvector + bm25_index.pkl
+python rag_agent.py    # interactive grounded Q&A
+python evaluate_rag.py # retrieval scores → docs/evaluation.md
 ```
 
 ---
 
-## Personas
+## Week 2 — Core Agent
 
-Personas are JSON files in the `personas/` directory. The Agent loads them by name and injects the persona context into the system prompt.
+**Goal:** a reusable, persona-agnostic `Agent` that orchestrates persona + memory + tools + LLM generation — no hardcoded provider or persona.
 
-### Example Persona (`personas/investor.json`)
+### Architecture
 
-```json
-{
-    "name": "Climate Investor",
-    "description": "A senior climate finance investor with 15 years of experience...",
-    "system_prompt": "You approach climate finance from an investment perspective...",
-    "tone": "Analytical, data-driven, focused on returns and risk management.",
-    "focus_areas": ["ROI and financial returns", "Risk assessment", "Market trends"]
-}
+```
+Persona (JSON config)
+     │
+     ▼
+┌─────────┐
+│  Agent  │  src/agent.py — respond() + generate_opinion()
+└────┬────┘
+     ├── Memory (Protocol / Conversation / Hybrid)
+     ├── Tools  (climate_knowledge_search, financial_calculator, web_search)
+     └── LLM    (provider registry, auto-discovered from src/llm/*.py)
+              │
+              ▼
+     Prompt builder (grounding rules → OPINION / EVIDENCE / REASONING / CAVEATS)
+              │
+              ▼
+     Structured opinion {topic, persona, opinion, evidence, sources,
+                         calculation, web_results, provider, model}
 ```
 
-### Adding a New Persona
+Tool routing is **keyword-based**: financial words (roi/npv/calculate/…) → `financial_calculator`; recency words (latest/recent/2026/…) → `web_search`; otherwise → `climate_knowledge_search` (Week 1 adapter).
 
-Create `personas/my_persona.json`:
-
-```json
-{
-    "name": "My Custom Persona",
-    "description": "...",
-    "system_prompt": "...",
-    "tone": "...",
-    "focus_areas": ["area1", "area2"]
-}
-```
-
-The Agent automatically discovers and can use any persona from the `personas/` directory.
-
-### Usage
+### Agent API
 
 ```python
+from src.agent import Agent
 from src.personas import load_persona, list_personas
-
-# List available personas
-names = list_personas()  # ["investor", "policy_expert", "scientist"]
-
-# Load a persona
-persona = load_persona("investor")
-```
-
----
-
-## Agent API
-
-### Initialization
-
-```python
-from src.agent import Agent
-from src.personas import load_persona
 from src.llm import get_provider
 from src.tools import RetrievalTool
 
-persona = load_persona("investor")
-llm = get_provider()  # reads from env vars
-tools = [RetrievalTool()]
+print(list_personas())  # investor, policy_expert, scientist, ...
 
-agent = Agent(persona=persona, llm=llm, tools=tools)
+agent = Agent(persona=load_persona("investor"),
+              llm=get_provider(),          # reads LLM_* env vars
+              tools=[RetrievalTool()])
+
+agent.respond("What is climate adaptation finance?")          # conversational
+agent.generate_opinion("Should developed countries increase climate finance?")  # structured
+agent.generate_opinion("Calculate ROI for a $1M solar farm",
+                       calculation="roi", initial=1_000_000, final=1_400_000)
 ```
 
-### respond() — Conversational
+Add a tool by subclassing `src.tools.base.Tool` (`name`, `description`, `run() → ToolResult`).
 
-```python
-response = agent.respond("What is climate adaptation finance?")
-# Returns: str
+### Personas
+
+JSON in `personas/` (`{name, description, system_prompt, tone, focus_areas}`), auto-discovered via `load_persona(name)`:
+
+| File | Role |
+|------|------|
+| `investor.json` | Climate Investor — ROI, risk, green bonds |
+| `policy_expert.json` | Policy Expert — equity/CBDR, IPCC/UNFCCC/NDC, loss & damage |
+| `scientist.json` | Environmental Scientist — carbon budgets, MRV, IPCC evidence |
+| `cfo_agent.json` | CFO — NPV/IRR/payback, stranded assets |
+| `env_specialist.json` | ESG analyst — anti-greenwashing, LCA, net-zero |
+| `industry_representative.json` (+ typo duplicate `industry__represenatative.json`) | Renewables manager — LCOE, blended finance |
+| `labour_representative.json` | ILO / just-transition |
+| `Government Agent.json` / `Fossil Fuel Industry Agent.json` | Diplomatic phased-policy / bridge-fuel + CCS views |
+| `sustainable_supply_chain.json` / `policy_compliance_officer.json` | Operational/compliance variants (used in evals) |
+
+### Tools & memory (built in Week 2, extended later)
+
+- `climate_knowledge_search` — Week 1 adapter, `[{source_url, chunk_text, rerank_score}]`.
+- `financial_calculator` — pure-math `npv()` + `roi()`.
+- `web_search` — `ddgs` + parallel fetch; HTML (`trafilatura/bs4`), PDFs (`pypdf` + `PyMuPDF+pytesseract` OCR), `[Page N]` chunking.
+- `Memory` Protocol → `ConversationMemory` (bounded history) → `AgentMemory` (history + key-value facts). RAM-only (see `demo.py`).
+
+```bash
+python week2_demo.py --persona investor --topic "Should fossil fuel subsidies be eliminated?" -v
+python week2_demo.py --provider openrouter   # override provider
 ```
 
-### generate_opinion() — Structured
-
-```python
-opinion = agent.generate_opinion("Should developed countries increase climate finance?")
-# Returns: {
-#     "topic": "Should developed countries increase climate finance?",
-#     "persona": "Climate Investor",
-#     "opinion": "...",
-#     "evidence": ["chunk1 text", "chunk2 text", ...],
-#     "sources": ["https://...", ...],
-#     "provider": "openrouter",
-#     "model": "anthropic/claude-3.5-sonnet"
-# }
-```
+Details: `docs/architecture.md`.
 
 ---
 
-## Tool System
+## Week 3 — Multi-Agent Discussion
 
-### Adding a New Tool
+**Goal:** a discussion engine — agents wired in a directed graph, routed deterministically, orchestrated over ≥3 rounds, with opinion tracking and persistent state.
 
-```python
-from src.tools.base import Tool, ToolResult
-
-class CalculatorTool(Tool):
-    name = "calculator"
-    description = "Perform calculations"
-
-    def run(self, expression: str = "", **kwargs) -> ToolResult:
-        try:
-            result = eval(expression)
-            return ToolResult(success=True, data=result)
-        except Exception as e:
-            return ToolResult(success=False, error=str(e))
+```
+AgentGraph (ring / fully-connected / persona_based_topology)
+  │  BFS forward + transpose → strongly connected
+  ▼
+GraphRouter.get_next_recipients(agent_id) → neighbors only (recipient_id metadata)
+  ▼
+DiscussionOrchestrator.start_discussion(topic, agents, config)
+  rounds → scheduler → context (20-msg bound + own prior opinion + retrieval)
+       → respond → route → opinion-track → persist → terminate
+  ▼
+Persistence (InMemory / File: data/discussions/{discussion_id}.json)
 ```
 
-Then pass it to the Agent:
+- **Graph** (`src/graph/`): `AgentGraph` + `create_ring / fully_connected / persona_based_topology` (finance→regulator→ESG→industry→finance plus cross-links); `validation.py` connectivity check.
+- **Router** (`src/routing/graph_router.py`): fan-out to neighbors only; rejects non-connected graphs.
+- **Orchestrator** (`src/orchestration/`): shared contracts in `models.py` (`Message/RetrievalEvent/OpinionRecord/DiscussionConfig/DiscussionState/DiscussionResult`); `SequentialScheduler` (same order each round), `MaxRoundsTermination`, bounded `DiscussionContextBuilder`, safe wrappers around respond/route/persist.
+- **Persistence** (`src/persistence/file_persistence.py`): one full-state JSON per discussion (`save/load/exists/list/delete`); `InMemoryPersistence` for tests/demos.
+- **Demo** (`week3_demo.py`): 4 round-aware persona agents (investor, regulator, ESG, CFO) with per-round evolving positions, 3 rounds (~18 routed messages), opinion trajectory + persistence check.
 
-```python
-agent = Agent(persona=persona, llm=llm, tools=[RetrievalTool(), CalculatorTool()])
+```bash
+python week3_demo.py
+python -m pytest tests/test_integration.py -v   # 6 behaviors: graph, routing,
+                                                 # ≥3 rounds, retrieval, persistence, opinions
 ```
+
+Guide: `docs/week3_guide.md`.
 
 ---
 
-## Week 1 Integration
+## Week 4 — Analytics + Hardening
 
-Week 2 wraps Week 1's `hybrid_search_with_metadata()` through a `RetrievalTool` adapter:
+### A. Opinion + Agreement analytics (`src/metrics/`)
 
-```python
-# Week 1 (unchanged)
-from retriever import hybrid_search_with_metadata
-results = hybrid_search_with_metadata(query, top_k=30, rrf_k=60, final_k=3)
+Consumed later as `calculate_opinion_change(history)` / `calculate_agreement(history)`, where `history` is a Week 3 `DiscussionState` or its `to_dict()` (e.g. from `data/discussions/*.json`). No Week 3 code modified, no new dependencies.
 
-# Week 2 (adapter)
-from src.tools import RetrievalTool
-tool = RetrievalTool()
-result = tool.run(query=query)
-# result.success = True
-# result.data = [{source_url, chunk_text, rerank_score}, ...]
+**Opinion trajectory** (`opinion.py`): Week 3 stores free-text opinions only, so stance is derived deterministically — support/oppose cue counts with 3-token negation flip (`stance = (P−N)/(P+N)`, no cues → 0.0), ×0.8 conditional dampening, range [-1, +1] (−1 = against, +1 = in favor). In-range numerics pass through (future-proofs a Week 3 stance field). Output per agent/round: `{agent_id, round, stance, change, status, n_cues, n_snapshots}` + summaries (initial/final, total/largest movement, direction up/down/flat/mixed). `change` only across consecutive valid rounds; missing → `missing`, bad values → `invalid`, duplicate snapshots → last wins. Never invents values.
+
+**Agreement** (`agreement.py`): one score per round — `1 − mean(pairwise |Δstance|) / 2`, clamped [0, 1] (1 = full agreement, 0 = max disagreement). 0–1 valid stances → `insufficient_data` (never fake 1.0); invalid/missing excluded and counted.
+
+```bash
+python -m pytest tests/test_opinion.py tests/test_agreement.py -v  # 29 tests
 ```
 
-The retrieval is lazy-loaded — it only imports the heavy Week 1 dependencies when the tool is actually used.
+Full method docs: `docs/opinion_agreement_metrics.md`.
+
+### B. Retrieval hardening (fixes the reported `week2_demo` failure)
+
+`retriever.py` used to load models + BM25 + Postgres **at import**, so one broken dep (the `PreTrainedModel` torch/transformers mismatch — not Postgres) killed all retrieval → "cannot formulate a grounded opinion". Now: lazy loading, clear per-cause error hints, BM25 fallback from `master_chunks.json` (no torch/DB needed), `RetrievalTool` auto-falls-back. `requirements.txt` documents the torch/transformers pair-upgrade fix.
+
+### C. Demo & repo fixes
+
+- `week3_demo.py`: `DemoAgent`s are round-aware (parse round/history from context, per-role 3-round arcs, evolving opinions); prints graph edges + routing metadata; fixed Windows cp1252 emoji crash.
+- `personas/scientist.json` restored (tests + docs expect it); deleted committed 0-byte `labour__representative.json`; moved stray `import os` in `src/llm/base.py` to top.
+
+### D. Multi-LLM benchmarking (scripts + reports)
+
+- `test_glm53flash.py` → GLM-5.3-Flash × investor/policy_expert → `docs/glm53flash_test_report.md`.
+- `test_personas_llms.py` / `simple_llm_test.py` → GPT-OSS-120B/20B via Groq → `docs/personas_llms_test_report.md`.
+- `run_evaluation.py`, `run__evaluation.py`/`runevaluation.py` → scripted evals (DeepSeek/Nemotron) → `evaluation_results.json`, `test_results*.json`, `my_test_results.json`.
 
 ---
 
-## Week 3 Interface
+## Setup
 
-Week 3 multi-agent system can use the Agent like this:
+```bash
+git clone https://github.com/Omar-Elemary/climate-finance-ai-agent.git
+cd climate-finance-ai-agent
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-```python
-from src.agent import Agent
-from src.personas import load_persona
-from src.llm import get_provider
-from src.tools import RetrievalTool
+# Knowledge base (Week 1; Postgres+pgvector only needed for vector search —
+# BM25 fallback works without it)
+python setup_postgres.py   # DB climate_rag / user postgres
+python scraper.py          # → data/raw/
+python chunker.py          # → data/chunks/master_chunks.json
+python embedder.py         # → pgvector + bm25_index.pkl
 
-llm = get_provider()
-tools = [RetrievalTool()]
-
-# Create agents for different personas
-agents = []
-for name in ["investor", "policy_expert", "scientist"]:
-    persona = load_persona(name)
-    agents.append(Agent(persona=persona, llm=llm, tools=tools))
-
-# Each agent generates grounded opinions independently
-for agent in agents:
-    opinion = agent.generate_opinion("Climate adaptation finance")
-    print(f"{opinion['persona']}: {opinion['opinion'][:200]}...")
+# LLM keys (cp .env.example .env):
+# LLM_PROVIDER=openrouter | openai | gemini | ollama | anthropic | openai_compat
+# LLM_API_KEY=...  (or <PROVIDER>_API_KEY, e.g. GEMINI_API_KEY)
+# LLM_MODEL=...  LLM_TEMPERATURE=0.2  LLM_MAX_TOKENS=2048
+# NOTE: new Google AI Studio keys start with "AQ." — use LLM_PROVIDER=gemini
+# (native google-genai route), not an OpenAI-compatible path.
 ```
 
-Week 3 does NOT need to know how memory, retrieval, LLM, tools, or personas work internally. The Agent hides all implementation details.
+Main deps: `crawl4ai, langchain-text-splitters, sentence-transformers, torch, torchvision, pgvector, psycopg2-binary, rank_bm25, python-dotenv, google-genai, openai>=1.0.0, pydantic>=2.0, pytest, pytest-mock`.
 
 ---
 
 ## Running
 
-### Demo
-
 ```bash
-# Set up environment
-cp .env.example .env
-# Edit .env with your API key
-
-# Run with all personas
-python week2_demo.py
-
-# Run with specific provider
-python week2_demo.py --provider openrouter
-
-# Run with specific persona
-python week2_demo.py --persona investor
-
-# Run with custom topic
-python week2_demo.py --topic "Should fossil fuel subsidies be eliminated?"
-
-# Verbose logging
-python week2_demo.py -v
+python rag_agent.py                                   # W1 interactive RAG
+python week2_demo.py --persona investor --topic "..." # W2 multi-persona opinions
+python week3_demo.py                                  # W3 4-agent × 3-round discussion
+python demo.py                                        # memory fact-recall demo
+python simple_llm_test.py                             # provider smoke test
+python -m pytest tests/ -v                            # 103 tests
 ```
 
-### Tests
+---
+
+## Project Structure
+
+```
+├── scraper.py / chunker.py / embedder.py / setup_postgres.py / retriever.py  # W1
+├── rag_agent.py / evaluate_rag.py                                            # W1 run + eval
+├── week2_demo.py / week3_demo.py / demo.py                                   # W2 / W3 / memory demos
+├── test_glm53flash.py / test_personas_llms.py / simple_llm_test.py           # W4 benchmarks
+├── run_evaluation.py / run__evaluation.py / runevaluation.py
+├── src/
+│   ├── agent.py                 # W2 Agent
+│   ├── llm/                     # base / openrouter / openai_compat / gemini (+ auto-discovery)
+│   ├── tools/                   # base / retrieval / financial_calculator / web_search
+│   ├── memory/                  # base / conversation / hybrid
+│   ├── personas/                # base dataclass / loader
+│   ├── prompts/builder.py       # context + opinion message builders
+│   ├── graph/                   # W3 base / topology / validation
+│   ├── routing/                 # W3 base / graph_router
+│   ├── orchestration/           # W3 orchestrator / models / context / scheduler /
+│   │                            #      termination / retriever / persistence / router
+│   ├── persistence/             # W3 file_persistence (data/discussions/*.json) / models
+│   └── metrics/                 # W4 opinion.py / agreement.py
+├── personas/*.json              # 12 personas (investor, policy_expert, scientist, ...)
+├── tests/                       # unit + test_integration + test_opinion + test_agreement + demo smokes
+├── docs/                        # architecture / evaluation / week3_guide /
+│                                #   opinion_agreement_metrics / glm + personas LLM reports
+└── data/                        # raw/ chunks/master_chunks.json discussions/
+```
+
+---
+
+## LLM Providers
+
+Auto-discovered from `src/llm/*.py`; select with `LLM_PROVIDER`:
+
+| Provider | Value | Default model |
+|----------|-------|---------------|
+| OpenRouter | `openrouter` | `anthropic/claude-3.5-sonnet` |
+| OpenAI | `openai` | `gpt-4o-mini` |
+| Gemini | `gemini` | `gemini-3.5-flash` |
+| Ollama | `ollama` | `llama3.1` (local) |
+| Anthropic | `anthropic` | `claude-3-5-sonnet-20241022` |
+| Any OpenAI-compat | `openai_compat` | + `LLM_BASE_URL` |
+
+Benchmarked here: GLM-5.3-Flash (OpenRouter), GPT-OSS-120B/20B (Groq), Gemini 3.5/3.7-flash, Nemotron super/ultra (OpenRouter).
+
+---
+
+## Tests
+
+103 tests, no live LLM/DB needed: unit (agent/llm/tool/personas/prompts/memory/graph/orchestration/persistence), `test_integration.py` (6 W3 behaviors), `test_opinion.py` + `test_agreement.py` (29 W4 metric tests), demo smokes.
 
 ```bash
 python -m pytest tests/ -v
@@ -334,34 +298,22 @@ python -m pytest tests/ -v
 
 ---
 
-## Week 1 Files (Untouched)
+## Data
 
-These files remain exactly as they were:
-
-| File | Purpose |
-|------|---------|
-| `scraper.py` | Scrapes climate finance URLs |
-| `chunker.py` | Chunks documents into overlapping segments |
-| `embedder.py` | Creates embeddings + BM25 index |
-| `setup_postgres.py` | Sets up PostgreSQL + pgvector |
-| `retriever.py` | Hybrid search (BM25 + Vector + RRF + Cross-Encoder) |
-| `rag_agent.py` | Week 1 agent (Gemini direct) |
-| `evaluate_rag.py` | Retrieval evaluation |
-| `bm25_index.pkl` | Pre-built BM25 index |
-| `data/` | Raw documents + chunks |
+- `data/raw/` — ~100 scraped `.md` docs with source headers.
+- `data/chunks/master_chunks.json` — `{chunk_id, parent_doc_id, source_url, text}`.
+- `data/discussions/` — persisted discussion states (e.g. `test-run-001.json`).
+- `bm25_index.pkl` — generated by `embedder.py` (gitignored), optional at runtime.
+- Root `*.json` — benchmark/eval result traces.
 
 ---
 
-## Notes
+## Limitations & Next Steps
 
-- **No hardcoded secrets** — all API keys via environment variables
-- **No hardcoded personas** — persona info injected through JSON config
-- **No hardcoded LLM providers** — provider selected at runtime via env var
-- **Lazy imports** — heavy dependencies (torch, sentence_transformers) only loaded when retrieval tool is used
-- **Clean interfaces** — Memory, Tool, LLMProvider are all abstract/protocol-based
-- **Single responsibility** — each module does one thing
+- Keyword (not LLM) tool routing — future: function-calling.
+- Hybrid memory + `FilePersistence` are single-process (no locking, full-overwrite) — fine for demos.
+- Lexicon stance is a proxy (sarcasm/diplomatic hedging compress toward 0); prefer a real Week 3 numeric stance if added.
+- Duplicate eval scripts (`run__evaluation.py` ≈ `runevaluation.py`) and the `industry__represenatative.json` typo-duplicate remain — consolidate next.
+- Out of this repo's scope (teammates'): influence, sentiment, reporting, visualization, unified engine, Week 5 frontend.
 
-###  Memory Mechanism (Hybrid Strategy)
-* **Selected Approach:** Hybrid Memory (Combining Conversation History Buffer + Structured Key-Value Fact Storage).
-* **Why:** Ensures chronological dialogue flow via the history buffer while preventing critical parameter degradation (like budget, region, or scope) by explicitly persisting them in a structured key-value store.
-* **Limitations:** Relies on manual or heuristic entity extraction in this baseline phase; state is stored in volatile RAM during runtime and would require a persistent database backend (like PostgreSQL/pgvector or Redis) for multi-session persistence across server restarts.
+Per-week details: `docs/architecture.md` (W2) · `docs/week3_guide.md` (W3) · `docs/evaluation.md` (W1 scores) · `docs/opinion_agreement_metrics.md` (W4).

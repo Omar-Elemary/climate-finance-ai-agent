@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
@@ -59,6 +60,3 @@ class LLMProvider(ABC):
     @staticmethod
     def _default_base_url() -> str | None:
         return None
-
-
-import os

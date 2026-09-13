@@ -39,11 +39,26 @@ def test_retrieval_tool_no_query():
 
 def test_retrieval_tool_retriever_unavailable():
     RetrievalTool = _get_retrieval_tool()
-    with patch("src.tools.retrieval._get_hybrid_search", return_value=None):
+    with patch("src.tools.retrieval._get_hybrid_search", return_value=None), \
+         patch("src.tools.retrieval._get_bm25_fallback_search", return_value=None):
         tool = RetrievalTool()
         result = tool.run(query="test")
         assert not result.success
         assert "not available" in result.error
+
+
+def test_retrieval_tool_falls_back_to_bm25():
+    RetrievalTool = _get_retrieval_tool()
+    mock_results = [
+        {"id": "c1", "source_url": "https://example.com", "chunk_text": "text", "rerank_score": 1.2}
+    ]
+    mock_fn = MagicMock(return_value=mock_results)
+    with patch("src.tools.retrieval._get_hybrid_search", return_value=None), \
+         patch("src.tools.retrieval._get_bm25_fallback_search", return_value=mock_fn):
+        tool = RetrievalTool()
+        result = tool.run(query="climate finance")
+        assert result.success
+        assert len(result.data) == 1
 
 
 def test_retrieval_tool_success():
@@ -63,7 +78,8 @@ def test_retrieval_tool_success():
 def test_retrieval_tool_exception():
     RetrievalTool = _get_retrieval_tool()
     mock_fn = MagicMock(side_effect=DBError("db down"))
-    with patch("src.tools.retrieval._get_hybrid_search", return_value=mock_fn):
+    with patch("src.tools.retrieval._get_hybrid_search", return_value=mock_fn), \
+         patch("src.tools.retrieval._get_bm25_fallback_search", return_value=None):
         tool = RetrievalTool()
         result = tool.run(query="test")
         assert not result.success
