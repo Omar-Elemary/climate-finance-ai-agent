@@ -317,3 +317,40 @@ python -m pytest tests/ -v
 - Out of this repo's scope (teammates'): influence, sentiment, reporting, visualization, unified engine, Week 5 frontend.
 
 Per-week details: `docs/architecture.md` (W2) · `docs/week3_guide.md` (W3) · `docs/evaluation.md` (W1 scores) · `docs/opinion_agreement_metrics.md` (W4).
+### Metric: Agent Influence
+
+* **Purpose:**  
+  Quantifies the estimated directional influence of each agent on the overall discussion by measuring how much other participants converge toward that agent's stance across consecutive rounds.
+
+* **Input:**  
+  Discussion history (either a `DiscussionState` instance or a raw `dict`) containing:
+  * `opinions`: Round-by-round opinion snapshots per agent.
+  * `messages`: Transcript of speaker contributions per round.
+
+* **Formula / Methodology:**  
+  Inspired by the DeGroot opinion dynamics and network convergence models:
+  1. For each consecutive round transition ($r \to r+1$):
+     * A speaker $A$ must have actively contributed in round $r$ (when message history is provided).
+     * For every peer $B \neq A$, the convergence pull toward $A$ is calculated:
+       $$\text{Pull}(A \to B, r) = |S_B(r) - S_A(r)| - |S_B(r+1) - S_A(r)|$$
+       *(A positive value indicates that agent $B$ shifted closer to agent $A$'s stance).*
+  2. Aggregated pull scores are floored at $0.0$ to focus on positive attraction/alignment.
+  3. The final score is normalized across all agents such that:
+     $$\sum_{i=1}^{N} \text{InfluenceScore}_i = 1.0$$
+
+* **Output:**  
+  A mapping of `agent_id` to an `AgentInfluence` object containing:
+  * `influence_score`: Normalized value in $[0.0, 1.0]$ (or `None` if data is insufficient).
+  * `raw_pull`: Absolute mean convergence pull.
+  * `messages_sent`: Total message count recorded for the agent.
+  * `status`: `"ok"` or `"insufficient_data"`.
+
+* **Interpretation:**  
+  * **Higher Score:** Indicates that shifts in other agents' stances were strongly correlated with and moved toward this agent's expressed position.
+  * **Important Distinction:** This metric reflects statistical association and convergence correlation over network transitions; it does not claim direct psychological or causal persuasion.
+
+* **Edge Cases & Limitations:**  
+  * **$< 2$ Agents or $< 2$ Rounds:** Returns `None` with status `"insufficient_data"`.
+  * **Static Opinions (Zero Movement):** Returns `0.0` for all agents with status `"ok"` (no fabricated scores).
+  * **Missing / Corrupted Stances:** Invalid stance values are safely filtered out using `opinion.extract_stance` validation.
+  
