@@ -1,3 +1,12 @@
+"""Week 4 Analytics Demo.
+
+Demonstrates the complete Week 4 analytics pipeline:
+1. Load a Week 3 discussion
+2. Run unified analytics (opinion, agreement, influence, sentiment)
+3. Generate a Markdown report
+4. Create visualizations (opinion trajectory chart, interaction graph)
+"""
+
 import sys
 import os
 
