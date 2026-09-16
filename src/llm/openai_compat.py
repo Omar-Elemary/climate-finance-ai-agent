@@ -1,3 +1,4 @@
+import os
 import logging
 from openai import OpenAI
 
@@ -11,15 +12,28 @@ class OpenAICompatProvider(LLMProvider):
 
     @staticmethod
     def _default_model() -> str:
-        return "gpt-4o-mini"
+        return "deepseek/deepseek-chat"
 
     def generate(self, messages: list[dict[str, str]], **kwargs) -> LLMResponse:
-        base_url = self.base_url or "https://api.openai.com/v1"
-        client = OpenAI(api_key=self.api_key, base_url=base_url)
+        base_url = (
+            self.base_url
+            or os.getenv("OPENAI_BASE_URL")
+            or os.getenv("OPENAI_API_BASE")
+            or os.getenv("LLM_BASE_URL")
+            or "https://openrouter.ai/api/v1"
+        )
+        api_key = (
+            self.api_key
+            or os.getenv("OPENAI_API_KEY")
+            or os.getenv("LLM_API_KEY")
+            or os.getenv("OPENROUTER_API_KEY")
+        )
 
-        temperature = kwargs.get("temperature", self.temperature)
-        max_tokens = kwargs.get("max_tokens", self.max_tokens)
-        model = kwargs.get("model", self.model)
+        client = OpenAI(api_key=api_key, base_url=base_url)
+
+        temperature = kwargs.get("temperature", getattr(self, "temperature", 0.2))
+        max_tokens = kwargs.get("max_tokens", getattr(self, "max_tokens", 2048))
+        model = kwargs.get("model", self.model) or os.getenv("LLM_MODEL", "deepseek/deepseek-chat")
 
         logger.info("OpenAI-compat: calling %s via %s", model, base_url)
 
@@ -85,3 +99,4 @@ class AnthropicProvider(OpenAICompatProvider):
     @staticmethod
     def _default_base_url() -> str | None:
         return AnthropicProvider._DEFAULT_BASE_URL
+    
