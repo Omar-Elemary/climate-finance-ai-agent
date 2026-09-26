@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Path
+from fastapi import APIRouter, Depends, Path
 
 from backend.app.core.errors import BackendError
 from backend.app.dependencies import get_discussion_service
@@ -77,34 +77,27 @@ def _adapt_state(state: Any, domain: str | None) -> DiscussionResponse:
         started_at=str(d.get("started_at", "")),
         completed_at=d.get("completed_at"),
         error=d.get("error"),
-        conclusion=d.get("conclusion"),
     )
 
 
 @router.post(
     "/discussions",
     response_model=DiscussionResponse,
-    status_code=202,
-    summary="Launch a discussion",
-    response_description=(
-        "RUNNING skeleton immediately; the debate executes in the "
-        "background and streams into persistence (poll GET). "
-        "Terminal states: completed / failed."
-    ),
+    status_code=201,
+    summary="Create a discussion",
+    response_description="Discussion created through the Core Agent",
 )
 def create_discussion(
     body: CreateDiscussionRequest,
-    background_tasks: BackgroundTasks,
     service: DiscussionService = Depends(get_discussion_service),
 ) -> DiscussionResponse:
-    state, runner = service.launch_discussion(
+    state = service.create_discussion(
         topic=body.topic,
         num_rounds=body.num_rounds,
         domain=body.domain,
         personas=body.personas,
         enable_retrieval=body.enable_retrieval,
     )
-    background_tasks.add_task(runner)
     domain = body.domain
     if domain is None and hasattr(service, "domain_for"):
         try:
