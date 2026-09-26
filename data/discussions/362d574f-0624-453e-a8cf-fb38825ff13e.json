@@ -1,0 +1,118 @@
+{
+  "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+  "topic": "Should developed countries significantly increase climate adaptation finance for developing nations?",
+  "participants": [
+    "environmental_&_sustainability_specialist",
+    "climate_investor",
+    "policy_&_compliance_officer"
+  ],
+  "current_round": 3,
+  "total_rounds": 3,
+  "status": "completed",
+  "messages": [
+    {
+      "message_id": "ac72a166-0169-4a5c-8feb-c3405446a2ca",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 1,
+      "agent_id": "environmental_&_sustainability_specialist",
+      "agent_name": "Environmental & Sustainability Specialist",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:04.942253+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "b4fd73d5-ca91-4dc1-8499-b547ed66a3b2",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 1,
+      "agent_id": "climate_investor",
+      "agent_name": "Climate Investor",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:06.254469+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "451f80f3-5708-4958-a877-ade16c2ec8fd",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 1,
+      "agent_id": "policy_&_compliance_officer",
+      "agent_name": "Policy & Compliance Officer",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:07.560366+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "c4b16364-7671-4f5b-b498-e92ee9158e13",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 2,
+      "agent_id": "environmental_&_sustainability_specialist",
+      "agent_name": "Environmental & Sustainability Specialist",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:08.868537+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "e96dceab-3de6-472c-9f58-e3399a007b7f",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 2,
+      "agent_id": "climate_investor",
+      "agent_name": "Climate Investor",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:10.170388+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "e33a09ff-bdfa-4649-a3f5-b367644e8c79",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 2,
+      "agent_id": "policy_&_compliance_officer",
+      "agent_name": "Policy & Compliance Officer",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:11.449531+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "25c33238-e9aa-4adf-9899-35f48830dc01",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 3,
+      "agent_id": "environmental_&_sustainability_specialist",
+      "agent_name": "Environmental & Sustainability Specialist",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:12.753094+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "b7e37042-71ef-43cf-8f93-3445609c43ed",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 3,
+      "agent_id": "climate_investor",
+      "agent_name": "Climate Investor",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:14.053350+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "017f2c0e-6585-44e0-ae0f-2807bcae92fe",
+      "discussion_id": "362d574f-0624-453e-a8cf-fb38825ff13e",
+      "round": 3,
+      "agent_id": "policy_&_compliance_officer",
+      "agent_name": "Policy & Compliance Officer",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:35:15.369559+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    }
+  ],
+  "opinions": {},
+  "retrieval_events": [],
+  "started_at": "2026-09-26T18:35:04.669571+00:00",
+  "completed_at": "2026-09-26T18:35:16.470942+00:00",
+  "error": null
+}

@@ -1,0 +1,70 @@
+[
+  {
+    "model": "nvidia/nemotron-3-super-120b-a12b:free",
+    "persona": "industry_representative",
+    "topic": "Is current climate finance sufficient and well-targeted to support a just energy transition?",
+    "opinion": "[nvidia/nemotron-3-super-120b-a12b:free - Industry Representative Perspective]: Climate finance is still insufficient in practice, even where headline investment numbers are increasing. Too little finance reaches bankable projects, while high cost of capital, permitting delays, grid constraints, and limited project pipelines slow deployment. Priority should be given to de-risking instruments, blended finance, guarantees, storage, and mechanisms that mobilise private investment and improve project economics and LCOE.",
+    "sources": [
+      "https://about.bnef.com/insights/finance/energy-transition-investment-trends/",
+      "https://www.irena.org/Energy-Transition/Outlook",
+      "https://www.irena.org/Publications/2026/May/Transitioning-away-from-fossil-fuels",
+      "https://www.iea.org/energy-system/renewables-and-low-emissions-fuels",
+      "https://climatefundsupdate.org/about-climate-finance/global-climate-finance-architecture/",
+      "https://unfccc.int/topics/introduction-to-climate-finance"
+    ],
+    "provider": "openrouter",
+    "model_used": "nvidia/nemotron-3-super-120b-a12b:free",
+    "status": "success"
+  },
+  {
+    "model": "nvidia/nemotron-3-super-120b-a12b:free",
+    "persona": "labour_representative",
+    "topic": "Is current climate finance sufficient and well-targeted to support a just energy transition?",
+    "opinion": "[nvidia/nemotron-3-super-120b-a12b:free - Labour Representative Perspective]: Climate finance is badly targeted when it prioritises corporate projects and investment while underfunding workers and affected communities. A just energy transition requires funding for retraining and reskilling, wage protection, social protection, job quality, and support for fossil-fuel and coal-dependent communities. Workers and unions must have a meaningful role through collective bargaining and social dialogue, and commitments should be binding rather than relying primarily on voluntary pledges.",
+    "sources": [
+      "https://www.ilo.org/topics-and-sectors/just-transition-towards-environmentally-sustainable-economies-and-societies",
+      "https://www.lse.ac.uk/granthaminstitute/explainers/what-is-the-just-transition-and-what-does-it-mean-for-climate-action/",
+      "https://commission.europa.eu/topics/regional-and-urban-policy/just-transition-mechanism_en",
+      "https://www.cesr.org/no-transition-without-workers/",
+      "https://www.iea.org/reports/world-energy-employment-2023/executive-summary",
+      "https://www.wri.org/insights/just-transition-developing-countries-shift-oil-gas"
+    ],
+    "provider": "openrouter",
+    "model_used": "nvidia/nemotron-3-super-120b-a12b:free",
+    "status": "success"
+  },
+  {
+    "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "persona": "industry_representative",
+    "topic": "Is current climate finance sufficient and well-targeted to support a just energy transition?",
+    "opinion": "[nvidia/nemotron-3-ultra-550b-a55b:free - Industry Representative Perspective]: Climate finance is still insufficient in practice, even where headline investment numbers are increasing. Too little finance reaches bankable projects, while high cost of capital, permitting delays, grid constraints, and limited project pipelines slow deployment. Priority should be given to de-risking instruments, blended finance, guarantees, storage, and mechanisms that mobilise private investment and improve project economics and LCOE.",
+    "sources": [
+      "https://about.bnef.com/insights/finance/energy-transition-investment-trends/",
+      "https://www.irena.org/Energy-Transition/Outlook",
+      "https://www.irena.org/Publications/2026/May/Transitioning-away-from-fossil-fuels",
+      "https://www.iea.org/energy-system/renewables-and-low-emissions-fuels",
+      "https://climatefundsupdate.org/about-climate-finance/global-climate-finance-architecture/",
+      "https://unfccc.int/topics/introduction-to-climate-finance"
+    ],
+    "provider": "openrouter",
+    "model_used": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "status": "success"
+  },
+  {
+    "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "persona": "labour_representative",
+    "topic": "Is current climate finance sufficient and well-targeted to support a just energy transition?",
+    "opinion": "[nvidia/nemotron-3-ultra-550b-a55b:free - Labour Representative Perspective]: Climate finance is badly targeted when it prioritises corporate projects and investment while underfunding workers and affected communities. A just energy transition requires funding for retraining and reskilling, wage protection, social protection, job quality, and support for fossil-fuel and coal-dependent communities. Workers and unions must have a meaningful role through collective bargaining and social dialogue, and commitments should be binding rather than relying primarily on voluntary pledges.",
+    "sources": [
+      "https://www.ilo.org/topics-and-sectors/just-transition-towards-environmentally-sustainable-economies-and-societies",
+      "https://www.lse.ac.uk/granthaminstitute/explainers/what-is-the-just-transition-and-what-does-it-mean-for-climate-action/",
+      "https://commission.europa.eu/topics/regional-and-urban-policy/just-transition-mechanism_en",
+      "https://www.cesr.org/no-transition-without-workers/",
+      "https://www.iea.org/reports/world-energy-employment-2023/executive-summary",
+      "https://www.wri.org/insights/just-transition-developing-countries-shift-oil-gas"
+    ],
+    "provider": "openrouter",
+    "model_used": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "status": "success"
+  }
+]

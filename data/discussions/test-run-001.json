@@ -1,0 +1,41 @@
+{
+  "discussion_id": "test-run-001",
+  "topic": "Should developed countries increase climate finance?",
+  "participants": [
+    "cfo_agent_01",
+    "env_specialist_01"
+  ],
+  "current_round": 1,
+  "total_rounds": 3,
+  "status": "initialized",
+  "messages": [
+    {
+      "message_id": "m1",
+      "discussion_id": "test-run-001",
+      "round": 1,
+      "agent_id": "cfo_agent_01",
+      "agent_name": "CFO Expert",
+      "content": "From a financial perspective...",
+      "timestamp": "2026-09-08T04:20:08.326479+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    }
+  ],
+  "opinions": {
+    "cfo_agent_01": [
+      {
+        "agent_id": "cfo_agent_01",
+        "agent_name": "CFO Expert",
+        "round": 1,
+        "opinion": "STANCE: Support (0.6)",
+        "evidence": [],
+        "sources": [],
+        "timestamp": "2026-09-08T04:20:08.326538+00:00"
+      }
+    ]
+  },
+  "retrieval_events": [],
+  "started_at": "2026-09-08T04:20:08.326406+00:00",
+  "completed_at": null,
+  "error": null
+}
