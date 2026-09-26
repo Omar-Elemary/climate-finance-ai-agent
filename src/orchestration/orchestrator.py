@@ -22,7 +22,7 @@ It does NOT own:
 import logging
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Callable
 
 from .models import (
     DiscussionConfig,
@@ -33,6 +33,7 @@ from .models import (
     OpinionRecord,
     RetrievalEvent,
 )
+from .conclusion import build_deterministic_conclusion
 from .context import DiscussionContextBuilder
 from .scheduler import SequentialScheduler, AgentScheduler
 from .termination import MaxRoundsTermination, TerminationPolicy
@@ -67,6 +68,7 @@ class DiscussionOrchestrator:
         scheduler: AgentScheduler | None = None,
         termination: TerminationPolicy | None = None,
         context_builder: DiscussionContextBuilder | None = None,
+        conclusion_provider: Callable[[DiscussionState], str | None] | None = None,
     ) -> None:
         self.router = router or PassthroughRouter()
         self.retriever = retriever
@@ -74,6 +76,10 @@ class DiscussionOrchestrator:
         self.scheduler = scheduler or SequentialScheduler()
         self.termination = termination or MaxRoundsTermination()
         self.context_builder = context_builder or DiscussionContextBuilder()
+        # Optional LLM-backed synthesis. When set and returning non-empty
+        # text it wins; otherwise the deterministic builder is the fallback
+        # so a conclusion always exists offline (tests, stub agents).
+        self.conclusion_provider = conclusion_provider
 
         logger.info(
             "DiscussionOrchestrator initialized: router=%s, retriever=%s, persistence=%s",
@@ -153,6 +159,8 @@ class DiscussionOrchestrator:
             # 4. Complete
             state.status = DiscussionStatus.COMPLETED
             state.completed_at = datetime.now(timezone.utc)
+            if config.enable_conclusion and not state.conclusion:
+                state.conclusion = self._build_conclusion(state)
 
         except Exception as e:
             logger.error("Discussion failed: %s", e, exc_info=True)
@@ -324,6 +332,21 @@ class DiscussionOrchestrator:
 
         except Exception as e:
             logger.warning("Opinion tracking failed for agent %s: %s", agent_id, e)
+
+    def _build_conclusion(self, state: DiscussionState) -> str | None:
+        """Synthesize the closing conclusion; LLM hook first, then fallback."""
+        if self.conclusion_provider is not None:
+            try:
+                custom = self.conclusion_provider(state)
+                if custom and str(custom).strip():
+                    return str(custom).strip()
+            except Exception as e:
+                logger.warning("Custom conclusion provider failed: %s", e)
+        try:
+            return build_deterministic_conclusion(state)
+        except Exception as e:
+            logger.warning("Deterministic conclusion failed: %s", e)
+            return None
 
     def _safe_agent_respond(self, agent: Any, context: str) -> str:
         """Safely call agent.respond() with error handling."""

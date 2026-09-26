@@ -271,6 +271,26 @@ class DiscussionService:
             ) from exc
         if state is None:
             raise DiscussionNotFoundError(discussion_id)
+        # Backfill conclusion for discussions persisted before it existed:
+        # completed debates with messages but no conclusion get the
+        # deterministic synthesis so GET always ends the debate properly.
+        try:
+            status = getattr(getattr(state, "status", None), "value", getattr(state, "status", ""))
+            if status == "completed" and not getattr(state, "conclusion", None):
+                if getattr(state, "messages", None):
+                    from src.orchestration.conclusion import build_deterministic_conclusion
+
+                    state.conclusion = build_deterministic_conclusion(state)
+                    try:
+                        self.persistence.save(state)
+                    except Exception:
+                        logger.warning(
+                            "Could not persist backfilled conclusion for %s",
+                            discussion_id,
+                            exc_info=True,
+                        )
+        except Exception:
+            logger.warning("Conclusion backfill failed for %s", discussion_id, exc_info=True)
         return state
 
     def domain_for(self, discussion_id: str) -> str | None:

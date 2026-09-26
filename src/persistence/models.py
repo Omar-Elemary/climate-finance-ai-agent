@@ -74,6 +74,7 @@ def discussion_state_from_dict(data: dict) -> DiscussionState:
         started_at=_parse_dt(data.get("started_at")),
         completed_at=_parse_dt(data.get("completed_at")),
         error=data.get("error"),
+        conclusion=data.get("conclusion"),
     )
 
     state.messages = [message_from_dict(m) for m in data.get("messages", [])]

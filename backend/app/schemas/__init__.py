@@ -89,6 +89,7 @@ class DiscussionResponse(BaseModel):
     started_at: str
     completed_at: Optional[str] = None
     error: Optional[str] = None
+    conclusion: Optional[str] = None
 
 
 # ------------------------------------------------------------------ analytics

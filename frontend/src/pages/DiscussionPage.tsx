@@ -359,6 +359,18 @@ const DiscussionPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* final conclusion — the debate's closing synthesis */}
+          {(mode === 'full' || done >= total) && discussionData.conclusion && (
+            <div className={`relative border-t px-4 py-5 ${light ? 'border-black/20 bg-white' : 'border-white/10 bg-black/60'}`}>
+              <div className={`font-mono2 text-[10px] tracking-[0.3em] ${light ? 'text-black/55' : 'text-paper/50'}`}>
+                FINAL CONCLUSION — RAPPORTEUR'S SYNTHESIS
+              </div>
+              <div className={`mt-2 whitespace-pre-line font-mono2 text-[13px] leading-relaxed ${light ? 'text-black/85' : 'text-paper/85'}`}>
+                {discussionData.conclusion}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ticker */}

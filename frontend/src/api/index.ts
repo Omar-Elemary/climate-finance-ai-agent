@@ -56,6 +56,7 @@ export interface DiscussionResponse {
   rounds: Array<{ round: number; messages: DiscussionMessage[] }>
   messages: DiscussionMessage[]
   opinions: Record<string, unknown[]>
+  conclusion?: string | null
 }
 
 export function getApiErrorMessage(err: unknown, fallback: string): string {

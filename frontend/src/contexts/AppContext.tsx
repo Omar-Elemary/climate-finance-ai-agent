@@ -16,6 +16,7 @@ interface DiscussionData {
   }>
   messages: DiscussionMessage[]
   opinions: Record<string, unknown[]>
+  conclusion?: string | null
 }
 
 interface AnalyticsData {

@@ -67,7 +67,7 @@ Request (all fields match the Core Agent contract: `topic` + `DiscussionConfig`)
 
 - `topic` (required, non-empty), `domain` (optional grouping tag — API-level only, not stored in Week 3 state), `num_rounds` 1–10 (default 3), `personas` (optional; defaults to investor/policy_expert/scientist; names must exist in `personas/*.json`), `enable_retrieval` (default true; agents use the Week 1 tool, orchestrator-level retriever stays off as in `week3_demo.py`).
 
-Response (`DiscussionResponse`): `discussion_id`, `topic`, `domain`, `participants`, `rounds_completed`, `total_rounds`, `status`, `rounds[]` (messages grouped by round), `messages[]`, `opinions{agent: [...]}`, `started_at`, `completed_at`, `error`.
+Response (`DiscussionResponse`): `discussion_id`, `topic`, `domain`, `participants`, `rounds_completed`, `total_rounds`, `status`, `rounds[]` (messages grouped by round), `messages[]`, `opinions{agent: [...]}`, `started_at`, `completed_at`, `error`, `conclusion` (3-bullet closing synthesis; present once `status` is `completed`, `null` while `running`).
 
 Poll `GET /discussions/{id}` every ~3s until `status` is `completed` (or
 `failed`): each poll returns more `rounds[]`/`messages[]` as turns land.

@@ -77,6 +77,7 @@ def _adapt_state(state: Any, domain: str | None) -> DiscussionResponse:
         started_at=str(d.get("started_at", "")),
         completed_at=d.get("completed_at"),
         error=d.get("error"),
+        conclusion=d.get("conclusion"),
     )
 
 
