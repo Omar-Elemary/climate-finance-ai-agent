@@ -322,11 +322,19 @@ def run_live_debate():
         stances = [f"R{getattr(s, 'round', i)}: {getattr(s, 'opinion', 'N/A')}" for i, s in enumerate(snapshots)]
         print(f"  • {agent_id}: {' -> '.join(stances)}")
 
-    # 8. Print Final Conclusion
+    # 8. Print Final Conclusion (LLM synthesis preferred, orchestrator fallback)
     print("\n" + "=" * 80)
     print("🎯 FINAL SYNTHESIS & EXECUTIVE CONCLUSION")
     print("=" * 80)
-    conclusion = generate_final_conclusion(llm, debate_topic, result.messages)
+    try:
+        conclusion = generate_final_conclusion(llm, debate_topic, result.messages)
+    except Exception:
+        conclusion = getattr(result, "conclusion", None) or "Conclusion unavailable."
+    # Keep the orchestrator result consistent with what is displayed.
+    try:
+        result.conclusion = conclusion
+    except Exception:
+        pass
     print(conclusion)
     print("=" * 80)
 

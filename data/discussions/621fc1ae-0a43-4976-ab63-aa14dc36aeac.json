@@ -1,0 +1,118 @@
+{
+  "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+  "topic": "Are green bonds delivering additional climate impact or greenwashing?",
+  "participants": [
+    "policy_expert",
+    "environmental_scientist",
+    "financial_/_cfo_expert"
+  ],
+  "current_round": 3,
+  "total_rounds": 3,
+  "status": "completed",
+  "messages": [
+    {
+      "message_id": "f97b7755-24c7-460d-ba30-94815f796577",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 1,
+      "agent_id": "policy_expert",
+      "agent_name": "Policy Expert",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:12.223497+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "1ccff946-aeb1-48d0-bb84-4f0cef5fee84",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 1,
+      "agent_id": "environmental_scientist",
+      "agent_name": "Environmental Scientist",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:14.003519+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "a407a44a-6578-4548-9e00-44208bb394ce",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 1,
+      "agent_id": "financial_/_cfo_expert",
+      "agent_name": "Financial / CFO Expert",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:15.876132+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "382d065b-f7e6-4452-a281-e6ec84e7c653",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 2,
+      "agent_id": "policy_expert",
+      "agent_name": "Policy Expert",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:17.660804+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "3b5f692d-2af6-4351-99ed-b3be268e5f64",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 2,
+      "agent_id": "environmental_scientist",
+      "agent_name": "Environmental Scientist",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:19.475642+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "ed95190a-3f8a-4bbc-84ff-a63976215562",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 2,
+      "agent_id": "financial_/_cfo_expert",
+      "agent_name": "Financial / CFO Expert",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:21.393515+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "203f9c4c-88f2-413b-8baa-f4743582611a",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 3,
+      "agent_id": "policy_expert",
+      "agent_name": "Policy Expert",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:27.769371+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "d8b46466-6962-497c-a1b1-32591cf10d5b",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 3,
+      "agent_id": "environmental_scientist",
+      "agent_name": "Environmental Scientist",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:30.331535+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "2d4987fc-1aa4-4c2a-9f67-c5e3a55d86fd",
+      "discussion_id": "621fc1ae-0a43-4976-ab63-aa14dc36aeac",
+      "round": 3,
+      "agent_id": "financial_/_cfo_expert",
+      "agent_name": "Financial / CFO Expert",
+      "content": "[Agent error: 404 Not Found. {'message': '', 'status': 'Not Found'}]",
+      "timestamp": "2026-09-26T18:50:32.978373+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    }
+  ],
+  "opinions": {},
+  "retrieval_events": [],
+  "started_at": "2026-09-26T18:50:12.000128+00:00",
+  "completed_at": "2026-09-26T18:50:34.649583+00:00",
+  "error": null
+}

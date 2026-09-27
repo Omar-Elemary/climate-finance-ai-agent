@@ -19,6 +19,7 @@ from .models import (
     DiscussionStatus,
 )
 from .orchestrator import DiscussionOrchestrator
+from .conclusion import build_deterministic_conclusion
 from .context import DiscussionContextBuilder
 from .scheduler import SequentialScheduler, AgentScheduler
 from .termination import MaxRoundsTermination, TerminationPolicy
@@ -29,6 +30,7 @@ from .retriever import Retriever
 __all__ = [
     # Core
     "DiscussionOrchestrator",
+    "build_deterministic_conclusion",
     # Models
     "DiscussionState",
     "DiscussionConfig",

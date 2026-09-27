@@ -58,7 +58,11 @@ class Agent:
             except Exception as e:
                 logger.warning("Memory context failed: %s", e)
 
-        tool_instructions = self._format_tool_descriptions()
+        tool_instructions = ""
+        # NOTE: tool invocation is rule-based in Python (see generate_opinion);
+        # the model itself can never call tools, so no tool block is advertised.
+        # (Advertising tool names triggers native tool-calls in agentic models
+        # e.g. gpt-oss, which providers reject when no tools are registered.)
 
         messages = build_chat_messages(
             persona_context=self.persona.to_prompt_context(),

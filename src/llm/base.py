@@ -36,17 +36,33 @@ class LLMProvider(ABC):
                 f"{cls.provider_name.upper()}_API_KEY in your .env file."
             )
 
-        model = os.getenv("LLM_MODEL", cls._default_model())
-        base_url = os.getenv("LLM_BASE_URL") or cls._default_base_url()
-        temperature = float(os.getenv("LLM_TEMPERATURE", "0.2"))
-        max_tokens = int(os.getenv("LLM_MAX_TOKENS", "2048"))
+        model = (
+            os.getenv(f"{cls.provider_name.upper()}_MODEL")
+            or os.getenv("LLM_MODEL")
+            or cls._default_model()
+        )
+        base_url = (
+            os.getenv(f"{cls.provider_name.upper()}_BASE_URL")
+            or os.getenv("LLM_BASE_URL")
+            or cls._default_base_url()
+        )
+        temperature = (
+            os.getenv(f"{cls.provider_name.upper()}_TEMPERATURE")
+            or os.getenv("LLM_TEMPERATURE")
+            or "0.2"
+        )
+        max_tokens = (
+            os.getenv(f"{cls.provider_name.upper()}_MAX_TOKENS")
+            or os.getenv("LLM_MAX_TOKENS")
+            or "2048"
+        )
 
         return cls(
             api_key=api_key,
             model=model,
             base_url=base_url,
-            temperature=temperature,
-            max_tokens=max_tokens,
+            temperature=float(temperature),
+            max_tokens=int(max_tokens),
         )
 
     @abstractmethod

@@ -25,3 +25,5 @@ env/
 Thumbs.db
 *.pkl
 *.pickle
+node_modules/
+*.tsbuildinfo

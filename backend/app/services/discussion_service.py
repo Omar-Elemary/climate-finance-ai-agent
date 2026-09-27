@@ -159,6 +159,105 @@ class DiscussionService:
             self._save_domain_index()
         return state
 
+    def launch_discussion(
+        self,
+        topic: str,
+        num_rounds: int = 3,
+        domain: str | None = None,
+        personas: list[str] | None = None,
+        enable_retrieval: bool = True,
+    ) -> tuple[Any, Callable[[], None]]:
+        """Validate + stage a discussion, return (initial_state, runner).
+
+        The runner executes the blocking orchestrator; callers hand it to
+        FastAPI BackgroundTasks so POST returns in milliseconds while the
+        debate streams into persistence turn by turn (GET polls it live).
+        """
+        import uuid as _uuid
+
+        from src.orchestration.models import DiscussionState, DiscussionStatus
+
+        clean_topic = (topic or "").strip()
+        if not clean_topic:
+            raise InvalidRequestError("Topic must be a non-empty string.")
+        if not isinstance(num_rounds, int) or not 1 <= num_rounds <= MAX_ROUNDS:
+            raise InvalidRequestError(
+                f"num_rounds must be an integer between 1 and {MAX_ROUNDS}."
+            )
+
+        persona_names = list(personas) if personas else list(DEFAULT_PERSONAS)
+        if not persona_names:
+            raise InvalidRequestError("At least one persona is required.")
+        if len(set(persona_names)) != len(persona_names):
+            raise InvalidRequestError("Duplicate persona names are not allowed.")
+
+        loaded_personas = self._load_personas(persona_names)
+        agents = [self._agent_factory(p) for p in loaded_personas]
+        agent_ids = [_agent_id_for_persona(a) for a in agents]
+
+        from src.graph.topology import AgentGraph
+        from src.routing.graph_router import GraphRouter
+        from src.orchestration import DiscussionConfig, DiscussionOrchestrator
+
+        try:
+            graph = AgentGraph.create_persona_based_topology(agent_ids)
+        except Exception as exc:
+            raise ServiceUnavailableError(f"Failed to build discussion graph: {exc}") from exc
+        if not graph.is_strongly_connected():
+            raise ServiceUnavailableError("Discussion graph is not strongly connected.")
+
+        discussion_id = str(_uuid.uuid4())
+        config = DiscussionConfig(
+            num_rounds=num_rounds,
+            enable_retrieval=bool(enable_retrieval),
+            enable_opinion_tracking=True,
+        )
+        orchestrator = DiscussionOrchestrator(
+            router=GraphRouter(graph),
+            persistence=self.persistence,
+        )
+
+        # Persist the RUNNING skeleton first: this is what POST returns and
+        # what GET polls until the runner overwrites it turn by turn.
+        initial = DiscussionState(
+            discussion_id=discussion_id,
+            topic=clean_topic,
+            participants=list(agent_ids),
+            total_rounds=num_rounds,
+            status=DiscussionStatus.RUNNING,
+        )
+        try:
+            self.persistence.save(initial)
+        except Exception as exc:
+            raise ServiceUnavailableError(f"Discussion store unavailable: {exc}") from exc
+
+        if domain is not None:
+            self._domain_index[discussion_id] = domain
+            self._save_domain_index()
+
+        persistence = self.persistence
+
+        def _runner() -> None:
+            try:
+                orchestrator.start_discussion(
+                    topic=clean_topic,
+                    agents=agents,
+                    config=config,
+                    discussion_id=discussion_id,
+                )
+            except Exception as exc:  # pragma: no cover - defensive
+                logger.exception("Background discussion %s failed", discussion_id)
+                try:
+                    state = persistence.load(discussion_id)
+                    if state is not None:
+                        state.status = DiscussionStatus.FAILED
+                        state.error = str(exc)
+                        persistence.save(state)
+                except Exception:
+                    logger.exception("Could not mark discussion %s failed", discussion_id)
+
+        return initial, _runner
+
     def get_discussion(self, discussion_id: str) -> Any:
         discussion_id = (discussion_id or "").strip()
         if not discussion_id:
@@ -172,6 +271,26 @@ class DiscussionService:
             ) from exc
         if state is None:
             raise DiscussionNotFoundError(discussion_id)
+        # Backfill conclusion for discussions persisted before it existed:
+        # completed debates with messages but no conclusion get the
+        # deterministic synthesis so GET always ends the debate properly.
+        try:
+            status = getattr(getattr(state, "status", None), "value", getattr(state, "status", ""))
+            if status == "completed" and not getattr(state, "conclusion", None):
+                if getattr(state, "messages", None):
+                    from src.orchestration.conclusion import build_deterministic_conclusion
+
+                    state.conclusion = build_deterministic_conclusion(state)
+                    try:
+                        self.persistence.save(state)
+                    except Exception:
+                        logger.warning(
+                            "Could not persist backfilled conclusion for %s",
+                            discussion_id,
+                            exc_info=True,
+                        )
+        except Exception:
+            logger.warning("Conclusion backfill failed for %s", discussion_id, exc_info=True)
         return state
 
     def domain_for(self, discussion_id: str) -> str | None:

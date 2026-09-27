@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --climate-blue: #0ea5e9;
+  --climate-blue-dark: #0284c7;
+  --climate-blue-light: #38bdf8;
+  --climate-green: #10b981;
+  --climate-green-dark: #059669;
+  --climate-gray: #6b7280;
+  --pit: #0b0e11;
+  --pit-2: #12161b;
+  --pit-3: #1a2027;
+  --paper: #ede8dc;
+  --signal: #e5484d;
+  --moss: #3d8b5f;
+  --amber: #d98e32;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.font-display { font-family: 'Archivo', system-ui, sans-serif; }
+.font-serif-human { font-family: 'Newsreader', Georgia, serif; }
+.font-mono2 { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+/* ---------- war-room debate motion ---------- */
+@keyframes pit-live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(229,72,77,.7); }
+  50% { opacity: .65; box-shadow: 0 0 0 7px rgba(229,72,77,0); }
+}
+@keyframes pit-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes pit-slam {
+  0% { transform: scale(2.4) skewX(-8deg); opacity: 0; letter-spacing: .4em; }
+  55% { transform: scale(.96) skewX(-8deg); opacity: 1; }
+  100% { transform: scale(1) skewX(-8deg); opacity: 1; letter-spacing: .08em; }
+}
+@keyframes pit-slide-in {
+  from { transform: translateY(18px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes pit-eq-1 { 0%,100% { height: 6px; } 50% { height: 22px; } }
+@keyframes pit-eq-2 { 0%,100% { height: 18px; } 50% { height: 7px; } }
+@keyframes pit-eq-3 { 0%,100% { height: 10px; } 50% { height: 26px; } }
+@keyframes pit-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes pit-scan { from { transform: translateY(-100%); } to { transform: translateY(400%); } }
+@keyframes pit-stamp {
+  0% { transform: scale(1.8) rotate(-14deg); opacity: 0; }
+  60% { transform: scale(.94) rotate(-14deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-14deg); opacity: 1; }
+}
+@keyframes pit-glow-border {
+  0%,100% { border-color: rgba(229,72,77,.8); }
+  50% { border-color: rgba(229,72,77,.25); }
+}
+
+.anim-live-dot { animation: pit-live-pulse 1.6s ease-in-out infinite; }
+.anim-blink { animation: pit-blink 0.9s step-end infinite; }
+.anim-slam { animation: pit-slam .55s cubic-bezier(.16,1.2,.3,1) both; }
+.anim-slide-in { animation: pit-slide-in .45s ease-out both; }
+.anim-stamp { animation: pit-stamp .4s cubic-bezier(.16,1.2,.3,1) both; }
+.anim-ticker { animation: pit-ticker 32s linear infinite; will-change: transform; }
+.ticker-mask {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.ticker-pause:hover .anim-ticker { animation-play-state: paused; }
+
+/* ---------- persona stickers ---------- */
+@keyframes sticker-bob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg) scale(1.06); }
+  50% { transform: translateY(-3px) rotate(1.5deg) scale(1.1); }
+}
+@keyframes sticker-jaw {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+@keyframes sticker-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes sticker-ring {
+  0% { transform: scale(1); opacity: .8; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+.sticker {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  border: 2px solid #121A16;
+}
+.sticker svg { display: block; }
+.sticker-eyes { transform-origin: 50px 52px; animation: sticker-blink 4.2s ease-in-out infinite; }
+.sticker-talking { animation: sticker-bob .55s ease-in-out infinite; }
+.sticker-talking .sticker-eyes { animation-duration: 1.6s; }
+.sticker-jaw { transform-origin: 50px 67px; animation: sticker-jaw .32s ease-in-out infinite; }
+.sticker-ring {
+  position: absolute;
+  inset: -2px;
+  border: 2px solid #e5484d;
+  pointer-events: none;
+  animation: sticker-ring 1.1s ease-out infinite;
+}
+.anim-speaking-border { animation: pit-glow-border 1.4s ease-in-out infinite; }
+.eq-bar { width: 3px; border-radius: 2px; background: currentColor; }
+.eq-1 { animation: pit-eq-1 .7s ease-in-out infinite; }
+.eq-2 { animation: pit-eq-2 .9s ease-in-out infinite; }
+.eq-3 { animation: pit-eq-3 .6s ease-in-out infinite; }
+.eq-paused * { animation-play-state: paused !important; }
+
+.pit-scanline {
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.06), transparent);
+  animation: pit-scan 7s linear infinite;
+}
+.pit-noise {
+  background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+/* Keep focus visible for keyboard users */
+:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -8,6 +8,7 @@ import backend.app  # noqa: F401  (ensures repo-root sys.path bootstrap)
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.app.core.errors import BackendError, error_payload
@@ -19,6 +20,10 @@ from backend.app.schemas import ErrorResponse
 
 
 def create_app() -> FastAPI:
+    # Load environment variables from .env file
+    from dotenv import load_dotenv
+    load_dotenv()
+
     app = FastAPI(
         title="Qubeterra Climate Finance API",
         description=(
@@ -28,6 +33,15 @@ def create_app() -> FastAPI:
         ),
         version="0.1.0",
         responses={500: {"model": ErrorResponse}},
+    )
+
+    # Add CORS middleware to allow frontend connections
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],  # Frontend URL
+        allow_credentials=True,
+        allow_methods=["*"],  # Allows all methods
+        allow_headers=["*"],  # Allows all headers
     )
 
     app.include_router(health_route.router)

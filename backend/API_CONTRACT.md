@@ -46,7 +46,12 @@ Returns curated climate-finance topics. Each item:
 ]
 ```
 
-## `POST /discussions` → `201`
+## `POST /discussions` → `202`
+
+Launches a **real** discussion in the background and returns a `RUNNING`
+skeleton immediately (`discussion_id`, `topic`, `participants`,
+`rounds_completed: 0`, `status: "running"`, empty `rounds[]`/`messages[]`).
+The debate then streams into persistence turn by turn.
 
 Request (all fields match the Core Agent contract: `topic` + `DiscussionConfig`):
 
@@ -62,9 +67,13 @@ Request (all fields match the Core Agent contract: `topic` + `DiscussionConfig`)
 
 - `topic` (required, non-empty), `domain` (optional grouping tag — API-level only, not stored in Week 3 state), `num_rounds` 1–10 (default 3), `personas` (optional; defaults to investor/policy_expert/scientist; names must exist in `personas/*.json`), `enable_retrieval` (default true; agents use the Week 1 tool, orchestrator-level retriever stays off as in `week3_demo.py`).
 
-Response (`DiscussionResponse`): `discussion_id`, `topic`, `domain`, `participants`, `rounds_completed`, `total_rounds`, `status`, `rounds[]` (messages grouped by round), `messages[]`, `opinions{agent: [...]}`, `started_at`, `completed_at`, `error`.
+Response (`DiscussionResponse`): `discussion_id`, `topic`, `domain`, `participants`, `rounds_completed`, `total_rounds`, `status`, `rounds[]` (messages grouped by round), `messages[]`, `opinions{agent: [...]}`, `started_at`, `completed_at`, `error`, `conclusion` (3-bullet closing synthesis; present once `status` is `completed`, `null` while `running`).
 
-This runs a **real** discussion through `DiscussionOrchestrator` + Week 2 `Agent`s (persona graph → router → ≥1 rounds → opinion tracking → file persistence). Nothing is faked. Without `LLM_PROVIDER`/`LLM_API_KEY` it returns `503 SERVICE_UNAVAILABLE` with a fix hint.
+Poll `GET /discussions/{id}` every ~3s until `status` is `completed` (or
+`failed`): each poll returns more `rounds[]`/`messages[]` as turns land.
+Terminal states are `completed` / `failed`; without
+`LLM_PROVIDER`/`LLM_API_KEY`, launch itself returns `503 SERVICE_UNAVAILABLE`
+with a fix hint.
 
 ## `GET /discussions/{discussion_id}` → `200`
 
@@ -105,6 +114,6 @@ Notes:
 ## Frontend flow
 
 1. `GET /topics` → populate picker.
-2. `POST /discussions` → get `discussion_id` (show spinner; real LLM runs take time).
-3. `GET /discussions/{id}` → render rounds/messages/opinions.
-4. `GET /discussions/{id}/analytics` → render dashboard (trajectory chart, agreement, influence, sentiment, graph).
+2. `POST /discussions` → get `discussion_id` in milliseconds, navigate at once.
+3. `GET /discussions/{id}` → poll while `status == "running"`; render rounds/messages/opinions as they stream.
+4. `GET /discussions/{id}/analytics` → render dashboard once `completed` (trajectory chart, agreement, influence, sentiment, graph).

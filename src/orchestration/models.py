@@ -104,6 +104,7 @@ class DiscussionConfig:
     max_messages_per_agent: int | None = None
     enable_retrieval: bool = True
     enable_opinion_tracking: bool = True
+    enable_conclusion: bool = True
     context_max_messages: int = 20
     retrieval_query_template: str = (
         "Based on the topic '{topic}', provide a focused analysis."
@@ -126,6 +127,7 @@ class DiscussionState:
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: datetime | None = None
     error: str | None = None
+    conclusion: str | None = None
 
     def add_message(self, message: Message) -> None:
         self.messages.append(message)
@@ -164,6 +166,7 @@ class DiscussionState:
             "started_at": self.started_at.isoformat(),
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
             "error": self.error,
+            "conclusion": self.conclusion,
         }
 
 
@@ -182,6 +185,7 @@ class DiscussionResult:
     started_at: datetime
     completed_at: datetime | None
     error: str | None = None
+    conclusion: str | None = None
 
     @classmethod
     def from_state(cls, state: DiscussionState) -> "DiscussionResult":
@@ -197,6 +201,7 @@ class DiscussionResult:
             started_at=state.started_at,
             completed_at=state.completed_at,
             error=state.error,
+            conclusion=state.conclusion,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -215,4 +220,5 @@ class DiscussionResult:
             "started_at": self.started_at.isoformat(),
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
             "error": self.error,
+            "conclusion": self.conclusion,
         }

@@ -89,5 +89,5 @@ def discussion_id(client: TestClient) -> str:
         "/discussions",
         json={"topic": "Financing green hydrogen", "num_rounds": 2},
     )
-    assert resp.status_code == 201, resp.text
+    assert resp.status_code == 202, resp.text
     return resp.json()["discussion_id"]

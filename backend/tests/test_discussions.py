@@ -13,11 +13,16 @@ def test_create_discussion_returns_id_and_rounds(client: TestClient) -> None:
             "num_rounds": 2,
         },
     )
-    assert resp.status_code == 201, resp.text
-    body = resp.json()
-    assert body["discussion_id"]
-    assert body["topic"].startswith("Financing Industrial")
-    assert body["domain"] == "mitigation"
+    # Launch is async: 202 with a RUNNING skeleton, then poll GET.
+    assert resp.status_code == 202, resp.text
+    launch = resp.json()
+    assert launch["discussion_id"]
+    assert launch["topic"].startswith("Financing Industrial")
+    assert launch["domain"] == "mitigation"
+    assert launch["status"] == "running"
+
+    body = client.get(f"/discussions/{launch['discussion_id']}").json()
+    assert body["status"] == "completed"
     assert body["rounds_completed"] == 2
     assert len(body["messages"]) == 3 * 2  # 3 default personas x 2 rounds
     assert len(body["rounds"]) == 2
@@ -33,8 +38,10 @@ def test_create_discussion_with_explicit_personas(client: TestClient) -> None:
             "personas": ["investor", "policy_expert"],
         },
     )
-    assert resp.status_code == 201, resp.text
-    body = resp.json()
+    assert resp.status_code == 202, resp.text
+    discussion_id = resp.json()["discussion_id"]
+    body = client.get(f"/discussions/{discussion_id}").json()
+    assert body["status"] == "completed"
     assert body["rounds_completed"] == 3
     assert len(body["messages"]) == 2 * 3
 
@@ -94,15 +101,15 @@ def make_broken_service() -> DiscussionService:
         def generate_opinion(self, topic: str) -> dict:
             raise RuntimeError("LLM down")
 
-    # Force the agent factory to explode AND make persona loading succeed by
+    # Force launch to explode AND make persona loading succeed by
     # reusing a real persona name; the BoomAgent raises on every call, and the
     # orchestrator records "[Agent error...]" rather than crashing — so instead
-    # simulate a hard core failure at the persistence layer.
+    # simulate a hard core failure at launch time.
     service = DiscussionService(persistence=InMemoryPersistence())
     def _fail(**kwargs):
         raise RuntimeError("core exploded")
 
-    service.create_discussion = _fail  # type: ignore[method-assign]
+    service.launch_discussion = _fail  # type: ignore[method-assign]
     # Wrap back into BackendError mapping via route? The route lets unexpected
     # exceptions become 500; emulate service-level 503 instead:
     from backend.app.core.errors import ServiceUnavailableError
@@ -110,5 +117,5 @@ def make_broken_service() -> DiscussionService:
     def _unavailable(**kwargs):
         raise ServiceUnavailableError("Core discussion failed: core exploded")
 
-    service.create_discussion = _unavailable  # type: ignore[method-assign]
+    service.launch_discussion = _unavailable  # type: ignore[method-assign]
     return service

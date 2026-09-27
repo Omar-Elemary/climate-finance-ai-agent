@@ -1,0 +1,118 @@
+{
+  "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+  "topic": "Should Fossil Fuel Subsidies be Eliminated?",
+  "participants": [
+    "climate_investor",
+    "policy_expert",
+    "environmental_scientist"
+  ],
+  "current_round": 3,
+  "total_rounds": 3,
+  "status": "completed",
+  "messages": [
+    {
+      "message_id": "c49e0b56-ef57-47a6-abdf-1c9f1141b092",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 1,
+      "agent_id": "climate_investor",
+      "agent_name": "Climate Investor",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:38.870477+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "bc32d0e7-647f-4746-96ea-59a382dbc63c",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 1,
+      "agent_id": "policy_expert",
+      "agent_name": "Policy Expert",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:41.533057+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "e7a0169b-833c-4b25-a65f-12ee034440eb",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 1,
+      "agent_id": "environmental_scientist",
+      "agent_name": "Environmental Scientist",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:43.953158+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "e3d4a029-773c-4598-ab05-48976f7be2d7",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 2,
+      "agent_id": "climate_investor",
+      "agent_name": "Climate Investor",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:46.507758+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "afba8824-845d-413f-ac5c-d23e3a33336f",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 2,
+      "agent_id": "policy_expert",
+      "agent_name": "Policy Expert",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:48.966081+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "eca00783-9ee0-4672-9e48-d511eba3cc87",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 2,
+      "agent_id": "environmental_scientist",
+      "agent_name": "Environmental Scientist",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:51.416229+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "1f976379-b919-40bc-95e9-ed733f58cb41",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 3,
+      "agent_id": "climate_investor",
+      "agent_name": "Climate Investor",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:53.799152+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "c3f6d812-0025-4a18-b16d-b9a693d1d083",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 3,
+      "agent_id": "policy_expert",
+      "agent_name": "Policy Expert",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:56.241649+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    },
+    {
+      "message_id": "60cfb9db-edc9-43e9-811d-417041f1c970",
+      "discussion_id": "2a86aeca-c438-4183-a5cb-5eeaf5228e5d",
+      "round": 3,
+      "agent_id": "environmental_scientist",
+      "agent_name": "Environmental Scientist",
+      "content": "[Agent error: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}]",
+      "timestamp": "2026-09-23T15:45:58.682109+00:00",
+      "in_response_to": null,
+      "metadata": {}
+    }
+  ],
+  "opinions": {},
+  "retrieval_events": [],
+  "started_at": "2026-09-23T15:45:38.636960+00:00",
+  "completed_at": "2026-09-23T15:46:00.990302+00:00",
+  "error": null
+}

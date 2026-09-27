@@ -307,8 +307,8 @@ def test_persistence():
     )
 
     # Persistence should be called:
-    # 1 (init) + 3 (after each round) + 1 (final) = 5
-    assert mock_persistence.save.call_count == 5
+    # 1 (init) + 3 (after each turn) + 3 (after each round) + 1 (final) = 8
+    assert mock_persistence.save.call_count == 8
 
     # Each saved state should have the correct discussion_id
     for call in mock_persistence.save.call_args_list:

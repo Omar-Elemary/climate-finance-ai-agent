@@ -39,11 +39,19 @@ def build_system_message(
             "- If context is insufficient, state that you lack sufficient data.\n"
             "- Do not hallucinate or invent sources.\n"
             "- Cite context numbers when referencing evidence.\n"
-            "- Clearly distinguish between retrieved evidence and your analysis."
+            "- Clearly distinguish between retrieved evidence and your analysis.\n"
+            "- Be concise: keep every response under 220 words. Prefer short "
+            "paragraphs and compact tables over long prose."
         )
 
     if tool_instructions:
         parts.append(f"\nAVAILABLE TOOLS:\n{tool_instructions}")
+        parts.append(
+            "\nTOOL USE POLICY:\n"
+            "Tools are executed separately by the system, never by you. "
+            "Do not emit tool calls, function calls, JSON actions, or "
+            "reasoning-channel control tokens. Always reply in plain prose only."
+        )
 
     if memory_context:
         parts.append(f"\nCONVERSATION HISTORY:\n{memory_context}")
@@ -158,7 +166,9 @@ def build_opinion_messages(
             f"(retrieved evidence, calculated result, or web search results — "
             f"whichever was provided).\n"
             f"3. REASONING: Explain your analysis connecting evidence to your position.\n"
-            f"4. CAVEATS: Note any limitations or uncertainties."
+            f"4. CAVEATS: Note any limitations or uncertainties.\n\n"
+            f"Hard limit: the whole response must fit under 220 words. "
+            f"Cut filler, keep tables to at most 4 rows."
         ),
     })
     return messages
