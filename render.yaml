@@ -1,0 +1,28 @@
+# Render Blueprint — production backend for Qubeterra Climate Finance API.
+# Deploy: dashboard.render.com → New → Blueprint → pick this repo/branch.
+# Then set the `sync: false` values below in the Render dashboard
+# (copy them from your local .env).
+services:
+  - type: web
+    name: qubeterra-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: LLM_PROVIDER
+        value: openrouter
+      - key: LLM_MODEL
+        value: anthropic/claude-3.5-sonnet
+      - key: LLM_TEMPERATURE
+        value: "0.2"
+      - key: LLM_MAX_TOKENS
+        value: "2048"
+      # Secrets — set in dashboard (copy from local .env):
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        sync: false
+      # After the Vercel frontend is live, set this to its URL so the
+      # browser can call the API, e.g. https://your-app.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
