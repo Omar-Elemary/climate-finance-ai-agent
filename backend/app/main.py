@@ -35,10 +35,27 @@ def create_app() -> FastAPI:
         responses={500: {"model": ErrorResponse}},
     )
 
-    # Add CORS middleware to allow frontend connections
+    # Add CORS middleware to allow frontend connections.
+    # FRONTEND_URL / CORS_ORIGINS (comma-separated) extend the default.
+    # allow_origin_regex covers GitHub Codespaces forwarded ports
+    # (https://<name>-5173.app.github.dev) so the live demo works there.
+    import os as _os
+
+    _extra_origins = [
+        o.strip()
+        for o in _os.getenv(
+            "CORS_ORIGINS", _os.getenv("FRONTEND_URL", "")
+        ).split(",")
+        if o.strip()
+    ]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],  # Frontend URL
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            *_extra_origins,
+        ],
+        allow_origin_regex=r"https://.*\.(app\.github\.dev|githubpreview\.dev)(:\d+)?",
         allow_credentials=True,
         allow_methods=["*"],  # Allows all methods
         allow_headers=["*"],  # Allows all headers
