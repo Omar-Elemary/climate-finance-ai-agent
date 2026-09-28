@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppContext } from '../contexts/AppContext'
 import { Link, useParams } from 'react-router-dom'
 import MessageCard, { getAgentColor, getAgentName, isFailedMessage } from '../components/MessageCard'
+import MarkdownBody from '../components/MarkdownBody'
 import PersonaSticker from '../components/PersonaSticker'
 import MoodToggle from '../components/MoodToggle'
 
@@ -15,6 +16,109 @@ type FlatMsg = {
 
 const SPEEDS = [1, 2, 4] as const
 const CLASH_RE = /(disagree|oppose|wrong|reject|risky|no evidence|flawed|cannot|against|clash|bottleneck)/i
+
+type ConclusionSection = {
+  kind: 'consensus' | 'disagreements' | 'recommendation' | 'note'
+  label: string
+  body: string
+}
+
+function parseConclusion(text: string): { lede: string; sections: ConclusionSection[] } {
+  const lines = text.split('\n')
+  let lede = ''
+  const sections: ConclusionSection[] = []
+  let current: ConclusionSection | null = null
+  for (const raw of lines) {
+    const line = raw.trim()
+    if (!line) continue
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      const content = line.slice(2).trim()
+      const m = content.match(/^(consensus|remaining disagreements|disagreement|recommendation)\s*:\s*([\s\S]*)$/i)
+      if (m) {
+        const key = m[1].toLowerCase()
+        const kind: ConclusionSection['kind'] =
+          key.startsWith('consensus') ? 'consensus'
+          : key.startsWith('recommendation') ? 'recommendation'
+          : 'disagreements'
+        current = { kind, label: m[1].toUpperCase(), body: m[2].trim() }
+        sections.push(current)
+      } else {
+        current = { kind: 'note', label: 'NOTE', body: content }
+        sections.push(current)
+      }
+    } else if (current) {
+      current.body += '\n' + line
+    } else if (!lede) {
+      lede = line
+    } else {
+      lede += ' ' + line
+    }
+  }
+  return { lede, sections }
+}
+
+const CONCLUSION_ACCENT: Record<ConclusionSection['kind'], { dot: string; label: string; edge: string }> = {
+  consensus: { dot: 'bg-moss', label: 'text-moss', edge: 'border-moss/50' },
+  disagreements: { dot: 'bg-signal', label: 'text-signal', edge: 'border-signal/50' },
+  recommendation: { dot: 'bg-amberx', label: 'text-amberx', edge: 'border-amberx/50' },
+  note: { dot: 'bg-gray-400', label: 'text-gray-500', edge: 'border-gray-400/50' },
+}
+
+function ConclusionDossier({ conclusion, light }: { conclusion: string; light: boolean }) {
+  const [expanded, setExpanded] = React.useState(false)
+  const { lede, sections } = React.useMemo(() => parseConclusion(conclusion), [conclusion])
+  const needsCut = sections.some((s) => s.body.length > 320)
+  const card = light ? 'border-black/25 bg-[#faf7ef]' : 'border-signal/40 bg-pit-2'
+  return (
+    <div className={`anim-slide-in relative mt-4 border-2 ${card}`}>
+      <div className="h-1.5 bg-signal" aria-hidden />
+      <div className="px-5 py-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className={`font-mono2 text-[11px] tracking-[0.3em] ${light ? 'text-black/60' : 'text-paper/60'}`}>
+            ■ FINAL CONCLUSION — RAPPORTEUR'S SYNTHESIS
+          </span>
+          <span className="anim-stamp ml-auto inline-block border-2 border-moss px-2 py-0.5 font-mono2 text-[10px] tracking-[0.25em] text-moss">
+            SEALED · ON RECORD
+          </span>
+        </div>
+        {lede && (
+          <p className={`font-serif-human mt-3 text-lg italic leading-snug ${light ? 'text-black/80' : 'text-paper/80'}`}>
+            {lede}
+          </p>
+        )}
+        <div className="mt-4 space-y-4">
+          {sections.map((s, i) => {
+            const a = CONCLUSION_ACCENT[s.kind]
+            const cut = !expanded && s.body.length > 320
+            const body = cut ? s.body.slice(0, 320).replace(/[*`]/g, '').trimEnd() + '…' : s.body
+            return (
+              <div key={i} className={`border-l-4 pl-4 ${a.edge}`}>
+                <div className="flex items-center gap-2">
+                  <span aria-hidden className={`inline-block h-2.5 w-2.5 ${a.dot}`} />
+                  <span className={`font-mono2 text-[11px] font-semibold tracking-[0.25em] ${a.label}`}>
+                    {s.label}
+                  </span>
+                </div>
+                <div className="mt-1.5">
+                  <MarkdownBody text={body} light={light} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {needsCut && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className={`font-mono2 mt-4 border px-3 py-1.5 text-[11px] tracking-[0.2em] ${light ? 'border-black/25 text-black/70' : 'border-white/25 text-paper/70'}`}
+          >
+            {expanded ? '▲ COLLAPSE SYNTHESIS' : '▼ READ FULL SYNTHESIS'}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const DiscussionPage: React.FC = () => {
   const { discussionData, loading, error, loadDiscussion, loadAnalytics, mood } = useAppContext()
@@ -360,16 +464,9 @@ const DiscussionPage: React.FC = () => {
             </div>
           )}
 
-          {/* final conclusion — the debate's closing synthesis */}
+          {/* final conclusion — rapporteur's synthesis dossier */}
           {(mode === 'full' || done >= total) && discussionData.conclusion && (
-            <div className={`relative border-t px-4 py-5 ${light ? 'border-black/20 bg-white' : 'border-white/10 bg-black/60'}`}>
-              <div className={`font-mono2 text-[10px] tracking-[0.3em] ${light ? 'text-black/55' : 'text-paper/50'}`}>
-                FINAL CONCLUSION — RAPPORTEUR'S SYNTHESIS
-              </div>
-              <div className={`mt-2 whitespace-pre-line font-mono2 text-[13px] leading-relaxed ${light ? 'text-black/85' : 'text-paper/85'}`}>
-                {discussionData.conclusion}
-              </div>
-            </div>
+            <ConclusionDossier conclusion={discussionData.conclusion} light={light} />
           )}
         </div>
 
